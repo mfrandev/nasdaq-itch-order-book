@@ -23,5 +23,5 @@ include_directories(
 )
 
 # The compiled library code is here
-add_executable(vwap_generator main.cpp)
-target_link_libraries(vwap_generator fmt::fmt)
+add_executable(trexquant_take_home main.cpp)
+target_link_libraries(trexquant_take_home fmt::fmt)

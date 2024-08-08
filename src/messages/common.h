@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <cstdint>
+#include <unordered_map>
 
 /**
  * Message Type identifiers for all of the messages from the protocol spec
@@ -87,5 +88,7 @@ struct BinaryMessageHeader {
     uint16_t tracking_number;
     uint64_t timestamp; 
 };
+
+size_t messageTypeTo(char messageType);
 
 #endif //TREXQUANTTAKEHOME_MESSAGES_COMMON_H_
