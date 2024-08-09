@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <cstdint>
-#include <unordered_map>
 #include <memory>
 
 /**
@@ -43,7 +42,7 @@ const char MESSAGE_TYPE_DLCR_PRICE_DISCOVERY        = 'O'; // 1.8
 /**
  * Message size in bytes for all messages in the protocol spec, EXCLUDING THE HEADER
  */
-const size_t MESSAGE_HEADER_SIZE                    = 11; // COMMON MESSAGE HEADER
+const size_t MESSAGE_HEADER_SIZE                      = 11; // COMMON MESSAGE HEADER
 
 const size_t MESSAGE_SIZE_SYSTEM_EVENT                = 1; // 1.1
 
@@ -78,14 +77,19 @@ const size_t MESSAGE_SIZE_DLCR_PRICE_DISCOVERY        = 37; // 1.8
 
 // Format for the first 11 bytes of each message
 struct BinaryMessageHeader {
-    char message_type;
-    uint16_t stock_locate;
-    uint16_t tracking_number;
+    char messageType;
+    uint16_t stockLocate;
+    uint16_t trackingNumber;
     uint64_t timestamp; 
 };
 
+const int NUMBER_OF_BYTES_FOR_HEADER_CHUNK          = 13;
+const int NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK   = 2;
+
 std::shared_ptr<BinaryMessageHeader> parseHeader(const char* data);
 
-size_t messageTypeTo(char messageType);
+size_t messageTypeToNumberOfBytes(char messageType);
+
+void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, std::shared_ptr<BinaryMessageHeader> header);
 
 #endif //TREXQUANTTAKEHOME_MESSAGES_COMMON_H_

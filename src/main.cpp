@@ -1,16 +1,15 @@
-#include <iostream>
 #include <fstream>
 #include <vector>
-
 #include <fmt/format.h>
 
 #include <messages/common.h>
-#include <endian_utils.h>
 
-
+/**
+ * Parse and calculate a VWAP for a binary NASDAQ ITCH 5.0 file
+ */
 int main() {
+
     // Open File    
-    const std::size_t bufferSize = 64;  // 64 is a pretty safe buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
     std::ifstream file("../01302019.NASDAQ_ITCH50", std::ios::binary);
 
     if (!file) {
@@ -19,20 +18,23 @@ int main() {
     }
 
     // Initialize the buffer
+    const std::size_t bufferSize = 64;  // 64 is a pretty ok buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
     std::vector<char> buffer(bufferSize);
-    uint64_t count = 0;
 
     // And here is the magic
+    uint64_t counter = 0;
     while(file) {
-        ++count;
-        // For some reason, there happens to be two leading bytes at the start of each line (maybe bad solution to another endienness problem ?)
-        file.read(buffer.data(), 13);
-        std::shared_ptr<BinaryMessageHeader> header = parseHeader(&buffer[2]);
+        // For some reason, there happens to be two leading bytes at the start of each line (maybe bad solution to another endienness problem ? it works though)
+        file.read(buffer.data(), NUMBER_OF_BYTES_FOR_HEADER_CHUNK);
+        std::shared_ptr<BinaryMessageHeader> header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
         
-        // fmt::println("\n{} {} {} {}", header -> message_type, header -> stock_locate, header -> tracking_number, header -> timestamp);
+        // if(header -> messageType == MESSAGE_TYPE_STOCK_TRADING_ACTION)
+        //     fmt::println("{}. {} {} {} {}", ++counter, header -> messageType, header -> stockLocate, header -> trackingNumber, header -> timestamp);
 
         // Get the message body 
-        file.read(buffer.data(), messageTypeTo(header -> message_type));
+        std::size_t numberOfBytesForBody = messageTypeToNumberOfBytes(header -> messageType);
+        file.read(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody);
+        parseAndProcessMessageBody(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, header);
         buffer.clear();
     }
 

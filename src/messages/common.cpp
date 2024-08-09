@@ -1,5 +1,14 @@
 #include <common.h>
 
+#include <cassert>
+#include <fmt/format.h>
+
+#include <StockTradingAction.h>
+#include <OrderExecuted.h>
+#include <OrderExecutedWithPrice.h>
+#include <TradeNonCross.h>
+#include <CrossTrade.h>
+
 #include <utils/endian_utils.h>
 
 /**
@@ -9,17 +18,85 @@
 std::shared_ptr<BinaryMessageHeader> parseHeader(const char* data) {
     static std::shared_ptr<BinaryMessageHeader> header = std::make_shared<BinaryMessageHeader>();
     std::size_t offset = 0;
-    header -> message_type = toHostEndianUpTo64(&data[offset], 1);
-    offset+=1;
-    header -> stock_locate = toHostEndianUpTo64(&data[offset], 2);
-    offset+=2;
-    header -> tracking_number = (&data[offset], 2);
-    offset+=2;
+    header -> messageType = toHostEndianUpTo64(&data[offset], 1);
+    offset += 1;
+    header -> stockLocate = toHostEndianUpTo64(&data[offset], 2);
+    offset += 2;
+    header -> trackingNumber = (&data[offset], 2);
+    offset += 2;
     header -> timestamp = toHostEndianUpTo64(&data[offset], 6);
     return header;
 }
 
-size_t messageTypeTo(char messageType) {
+void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, std::shared_ptr<BinaryMessageHeader> header) {
+    switch(header -> messageType) {
+
+        // Messages we don't need to handle
+        case MESSAGE_TYPE_SYSTEM_EVENT:
+        case MESSAGE_TYPE_STOCK_DIRECTORY:
+        case MESSAGE_TYPE_REG_SHO:
+        case MESSAGE_TYPE_MARKET_PARTICIPANT_POSITION:
+        case MESSAGE_TYPE_MWCB_DECLINE_LEVEL:
+        case MESSAGE_TYPE_MWCB_STATUS:
+        case MESSAGE_TYPE_QUOTING_PERIOD_UPDATE:
+        case MESSAGE_TYPE_LULD_AUCTION_COLLAR:
+        case MESSAGE_TYPE_OPERATIONAL_HALT:
+        case MESSAGE_TYPE_ORDER_CANCELLED:
+        case MESSAGE_TYPE_ORDER_DELETE:
+        case MESSAGE_TYPE_ORDER_REPLACE:
+        case MESSAGE_TYPE_TRADE_BROKEN:
+        case MESSAGE_TYPE_NOII:
+        case MESSAGE_TYPE_RPII:
+        case MESSAGE_TYPE_DLCR_PRICE_DISCOVERY:
+            break;
+
+        // Messages we need to handle
+        case MESSAGE_TYPE_STOCK_TRADING_ACTION: 
+            {
+            std::shared_ptr<StockTradingAction> stockTradingAction = parseStockTradingActionBody(data);
+            // fmt::println("{},{},{},{}", stockTradingAction -> stock, stockTradingAction -> tradingState, stockTradingAction -> reserved, stockTradingAction -> reason);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_EXECUTED:
+            {
+            std::shared_ptr<OrderExecuted> orderExecuted = parseOrderExecutedBody(data);
+            // fmt::println("{},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
+            {
+            std::shared_ptr<OrderExecutedWithPrice> orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
+            // fmt::println("{},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
+            }
+            break;
+        case MESSAGE_TYPE_TRADE_NON_CROSS:
+            {
+            std::shared_ptr<TradeNonCross> tradeNonCross = parseTradeNonCrossBody(data);
+            // fmt::println("{},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
+            }
+            break;
+        case MESSAGE_TYPE_TRADE_CROSS:
+            {
+            std::shared_ptr<CrossTrade> crossTrade = parseCrossTradeBody(data);
+            // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
+            }
+            break;
+
+        // Messages we may need to handle
+        case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
+            break;
+        case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
+            break;
+
+        default:
+            break;
+    }
+}
+
+/**
+ * Given a message type, return how many bytes its body is
+ */
+size_t messageTypeToNumberOfBytes(char messageType) {
     size_t messageSize;
     switch(messageType) {
         case MESSAGE_TYPE_SYSTEM_EVENT:
