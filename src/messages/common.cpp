@@ -1,5 +1,24 @@
 #include <common.h>
 
+#include <utils/endian_utils.h>
+
+/**
+ * Take a pre-loaded sequence of bytes and parse the ITCH header out of it
+ * Use the same portion of memory to store the header, just because
+ */
+std::shared_ptr<BinaryMessageHeader> parseHeader(const char* data) {
+    static std::shared_ptr<BinaryMessageHeader> header = std::make_shared<BinaryMessageHeader>();
+    std::size_t offset = 0;
+    header -> message_type = toHostEndianUpTo64(&data[offset], 1);
+    offset+=1;
+    header -> stock_locate = toHostEndianUpTo64(&data[offset], 2);
+    offset+=2;
+    header -> tracking_number = (&data[offset], 2);
+    offset+=2;
+    header -> timestamp = toHostEndianUpTo64(&data[offset], 6);
+    return header;
+}
+
 size_t messageTypeTo(char messageType) {
     size_t messageSize;
     switch(messageType) {

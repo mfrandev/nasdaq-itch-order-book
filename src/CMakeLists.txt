@@ -22,6 +22,13 @@ include_directories(
     "./utils"
 )
 
+file(GLOB SOURCES
+  "main.cpp"
+  "./messages/*.cpp"
+  "./algorithm/*.cpp"
+  "./utils/*.cpp"
+)
+
 # The compiled library code is here
-add_executable(trexquant_take_home main.cpp)
+add_executable(trexquant_take_home ${SOURCES})
 target_link_libraries(trexquant_take_home fmt::fmt)

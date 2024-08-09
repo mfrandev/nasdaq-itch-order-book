@@ -1,15 +1,10 @@
 #ifndef TREXQUANTTAKEHOME_MESSAGES_COMMON_H_
 #define TREXQUANTTAKEHOME_MESSAGES_COMMON_H_
 
-/************************************************************
- * This file contains:
- * 1. A large set of message-related constants
- * 2. Structs common to multiple messages
- ***********************************************************/
-
 #include <stdlib.h>
 #include <cstdint>
 #include <unordered_map>
+#include <memory>
 
 /**
  * Message Type identifiers for all of the messages from the protocol spec
@@ -88,6 +83,8 @@ struct BinaryMessageHeader {
     uint16_t tracking_number;
     uint64_t timestamp; 
 };
+
+std::shared_ptr<BinaryMessageHeader> parseHeader(const char* data);
 
 size_t messageTypeTo(char messageType);
 
