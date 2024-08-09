@@ -1,5 +1,8 @@
 #include <endian_utils.h>
 
+#include <cstring>
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
 /**
  * The binary file stores integers big-endian, and x86 is little endian.
  * Here is a utility function to convery big-endian to little-endian
@@ -13,3 +16,15 @@ uint64_t toHostEndianUpTo64(const char* data, std::size_t size) {
     }
     return result;
 }
+
+#else
+/**
+ * If the host machine is already big-endian, do nothing special
+ */
+uint64_t toHostEndianUpTo64(const char* data, std::size_t size) {
+    uint64_t result;
+    std::memcmp(&result, &data[0], size);
+    return result;
+}
+
+#endif
