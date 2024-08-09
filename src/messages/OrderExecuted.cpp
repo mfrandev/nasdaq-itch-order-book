@@ -1,6 +1,6 @@
 #include <OrderExecuted.h>
 
-#include <utils/endian_utils.h>
+#include <endian_utils.h>
 
 std::shared_ptr<OrderExecuted> parseOrderExecutedBody(const char* data) {
     static std::shared_ptr<OrderExecuted> orderExecuted = std::make_shared<OrderExecuted>();

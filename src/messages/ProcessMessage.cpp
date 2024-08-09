@@ -1,4 +1,4 @@
-#include <common.h>
+#include <ProcessMessage.h>
 
 #include <cassert>
 #include <fmt/format.h>
@@ -8,25 +8,6 @@
 #include <OrderExecutedWithPrice.h>
 #include <TradeNonCross.h>
 #include <CrossTrade.h>
-
-#include <utils/endian_utils.h>
-
-/**
- * Take a pre-loaded sequence of bytes and parse the ITCH header out of it
- * Use the same portion of memory to store the header, just because
- */
-std::shared_ptr<BinaryMessageHeader> parseHeader(const char* data) {
-    static std::shared_ptr<BinaryMessageHeader> header = std::make_shared<BinaryMessageHeader>();
-    std::size_t offset = 0;
-    header -> messageType = toHostEndianUpTo64(&data[offset], 1);
-    offset += 1;
-    header -> stockLocate = toHostEndianUpTo64(&data[offset], 2);
-    offset += 2;
-    header -> trackingNumber = (&data[offset], 2);
-    offset += 2;
-    header -> timestamp = toHostEndianUpTo64(&data[offset], 6);
-    return header;
-}
 
 void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, std::shared_ptr<BinaryMessageHeader> header) {
     switch(header -> messageType) {

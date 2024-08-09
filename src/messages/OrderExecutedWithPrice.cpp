@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include <utils/endian_utils.h>
+#include <endian_utils.h>
 
 /**
  * Parse the orderExecutedWithPrice message body

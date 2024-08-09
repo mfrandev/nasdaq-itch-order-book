@@ -1,9 +1,11 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_COMMON_H_
-#define TREXQUANTTAKEHOME_MESSAGES_COMMON_H_
+#ifndef TREXQUANTTAKEHOME_MESSAGES_PROCESS_MESSAGE_H_
+#define TREXQUANTTAKEHOME_MESSAGES_PROCESS_MESSAGE_H_
 
 #include <stdlib.h>
 #include <cstdint>
 #include <memory>
+
+#include <MessageHeader.h>
 
 /**
  * Message Type identifiers for all of the messages from the protocol spec
@@ -75,21 +77,8 @@ const size_t MESSAGE_SIZE_RPII                        = 9; // 1.7
 
 const size_t MESSAGE_SIZE_DLCR_PRICE_DISCOVERY        = 37; // 1.8
 
-// Format for the first 11 bytes of each message
-struct BinaryMessageHeader {
-    char messageType;
-    uint16_t stockLocate;
-    uint16_t trackingNumber;
-    uint64_t timestamp; 
-};
-
-const int NUMBER_OF_BYTES_FOR_HEADER_CHUNK          = 13;
-const int NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK   = 2;
-
-std::shared_ptr<BinaryMessageHeader> parseHeader(const char* data);
-
 size_t messageTypeToNumberOfBytes(char messageType);
 
 void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, std::shared_ptr<BinaryMessageHeader> header);
 
-#endif //TREXQUANTTAKEHOME_MESSAGES_COMMON_H_
+#endif //TREXQUANTTAKEHOME_MESSAGES_PROCESS_MESSAGE_H_

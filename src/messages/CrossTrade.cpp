@@ -3,8 +3,8 @@
 #include <cstring>
 
 #include <StockTradingAction.h>
-#include <utils/string_utils.h>
-#include <utils/endian_utils.h>
+#include <string_utils.h>
+#include <endian_utils.h>
 
 /**
  * Parse the cross trade body from the binary buffer

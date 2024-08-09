@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fmt/format.h>
 
-#include <utils/string_utils.h>
+#include <string_utils.h>
 
 /**
  * Parse the stock trading action body contents from the buffer

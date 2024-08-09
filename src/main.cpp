@@ -2,7 +2,8 @@
 #include <vector>
 #include <fmt/format.h>
 
-#include <messages/common.h>
+#include <ProcessMessage.h>
+#include <MessageHeader.h>
 
 /**
  * Parse and calculate a VWAP for a binary NASDAQ ITCH 5.0 file
