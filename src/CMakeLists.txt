@@ -16,7 +16,7 @@ FetchContent_MakeAvailable(fmt)
 
 include_directories(
     "."
-    "./algorithm" 
+    "./bookkeeping" 
     # "./lib" bring back if adding fmt::fmt into the directory
     "./messages"
     "./utils"
@@ -25,7 +25,7 @@ include_directories(
 file(GLOB SOURCES
   "main.cpp"
   "./messages/*.cpp"
-  "./algorithm/*.cpp"
+  "./bookkeeping/*.cpp"
   "./utils/*.cpp"
 )
 
