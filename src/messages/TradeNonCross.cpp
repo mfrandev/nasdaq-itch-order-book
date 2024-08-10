@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <StockTradingAction.h>
+#include <AddOrder.h>
 #include <endian_utils.h>
 #include <string_utils.h>
 

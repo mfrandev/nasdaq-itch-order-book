@@ -3,17 +3,23 @@
 #include <cassert>
 #include <fmt/format.h>
 
-#include <StockTradingAction.h>
+#include <AddOrder.h>
+#include <AddOrderMPID.h>
+#include <BrokenTradeOrOrderExecution.h>
+#include <CrossTrade.h>
+#include <OrderCancel.h>
+#include <OrderDelete.h>
 #include <OrderExecuted.h>
 #include <OrderExecutedWithPrice.h>
+#include <OrderReplace.h>
+#include <StockTradingAction.h>
+#include <SystemEvent.h>
 #include <TradeNonCross.h>
-#include <CrossTrade.h>
 
 void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, std::shared_ptr<BinaryMessageHeader> header) {
     switch(header -> messageType) {
 
         // Messages we don't need to handle
-        case MESSAGE_TYPE_SYSTEM_EVENT:
         case MESSAGE_TYPE_STOCK_DIRECTORY:
         case MESSAGE_TYPE_REG_SHO:
         case MESSAGE_TYPE_MARKET_PARTICIPANT_POSITION:
@@ -22,10 +28,6 @@ void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, std:
         case MESSAGE_TYPE_QUOTING_PERIOD_UPDATE:
         case MESSAGE_TYPE_LULD_AUCTION_COLLAR:
         case MESSAGE_TYPE_OPERATIONAL_HALT:
-        case MESSAGE_TYPE_ORDER_CANCELLED:
-        case MESSAGE_TYPE_ORDER_DELETE:
-        case MESSAGE_TYPE_ORDER_REPLACE:
-        case MESSAGE_TYPE_TRADE_BROKEN:
         case MESSAGE_TYPE_NOII:
         case MESSAGE_TYPE_RPII:
         case MESSAGE_TYPE_DLCR_PRICE_DISCOVERY:
@@ -62,11 +64,47 @@ void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, std:
             // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
             }
             break;
-
-        // Messages we may need to handle
         case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
+            {
+            std::shared_ptr<AddOrder> addOrder = parseAddOrderBody(data);
+            // fmt::println("{},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
+            }
             break;
         case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
+            {
+            std::shared_ptr<AddOrderMPID> addOrderMPID = parseAddOrderMPIDBody(data);
+            // fmt::println("{},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
+            }
+            break;
+        case MESSAGE_TYPE_SYSTEM_EVENT:
+            {
+            std::shared_ptr<SystemEvent> systemEvent = parseSystemEventBody(data);
+            // fmt::println("{}",systemEvent -> eventCode);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_CANCELLED:
+            {
+            std::shared_ptr<OrderCancel> orderCancel = parseOrderCancelBody(data);
+            // fmt::println("{},{}",orderCancel -> originalOrderReferenceNumber, orderCancel -> cancelledShares);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_DELETE:
+            {
+            std::shared_ptr<OrderDelete> orderDelete = parseOrderDeleteBody(data);
+            // fmt::println("{}", orderDelete -> originalOrderReferenceNumber); 
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_REPLACE:
+            {
+            std::shared_ptr<OrderReplace> orderReplace = parseOrderReplaceBody(data);
+            // fmt::println("{},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
+            }
+            break;
+        case MESSAGE_TYPE_TRADE_BROKEN:
+            {
+            std::shared_ptr<BrokenTradeOrOrderExecution> brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
+            // fmt::println("{}", brokenTradeOrOrderExecution -> matchNumber);
+            }
             break;
 
         default:
