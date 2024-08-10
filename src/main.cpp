@@ -4,7 +4,9 @@
 
 #include <ProcessMessage.h>
 #include <MessageHeader.h>
+
 #include <iostream>
+#include <unordered_map>
 
 /**
  * Parse and calculate a VWAP for a binary NASDAQ ITCH 5.0 file
@@ -45,7 +47,6 @@ int main() {
         ProcessMessage::parseAndProcessMessageBody(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, header);
         buffer.clear();
     }
-
     // Close file
     file.close();
     return 0;

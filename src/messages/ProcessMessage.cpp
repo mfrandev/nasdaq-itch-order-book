@@ -17,111 +17,113 @@
 #include <SystemEvent.h>
 #include <TradeNonCross.h>
 
-static std::unordered_map<uint64_t, uint64_t> test;
+#include <time_utils.h>
 
 void ProcessMessage::parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, BinaryMessageHeader* header) {
-    switch(header -> messageType) {
 
-        // Messages we don't need to handle
-        // case MESSAGE_TYPE_STOCK_DIRECTORY:
-        // case MESSAGE_TYPE_REG_SHO:
-        // case MESSAGE_TYPE_MARKET_PARTICIPANT_POSITION:
-        // case MESSAGE_TYPE_MWCB_DECLINE_LEVEL:
-        // case MESSAGE_TYPE_MWCB_STATUS:
-        // case MESSAGE_TYPE_QUOTING_PERIOD_UPDATE:
-        // case MESSAGE_TYPE_LULD_AUCTION_COLLAR:
-        // case MESSAGE_TYPE_OPERATIONAL_HALT:
-        // case MESSAGE_TYPE_NOII:
-        // case MESSAGE_TYPE_RPII:
-        // case MESSAGE_TYPE_DLCR_PRICE_DISCOVERY:
-        //     break;
+    // Check if the hour has changed and handle things appropriately
+    uint8_t periodOfThisMessage = getCurrentPeriodFromTimestamp(header -> timestamp);
+    if(periodOfThisMessage != currentPeriod) {
+        // TODO: Tell the bookkeepers to transition to the next period
+        
+        // No need to continue keeping track of reporting period if market hours are done
+        if(periodOfThisMessage < NUMBER_OF_PERIODS_PER_DAY)
+            currentPeriod = periodOfThisMessage;
+    }
+
+    switch(header -> messageType) {
 
         // Messages we need to handle
         case MESSAGE_TYPE_STOCK_TRADING_ACTION: 
             {
-            std::shared_ptr<StockTradingAction> stockTradingAction = parseStockTradingActionBody(data);
+            StockTradingAction* stockTradingAction = parseStockTradingActionBody(data);
             // VWAPManager::getInstance().processStockTradingAction(header -> stockLocate, stockTradingAction);
             // fmt::println("{},{},{},{}", stockTradingAction -> stock, stockTradingAction -> tradingState, stockTradingAction -> reserved, stockTradingAction -> reason);
             }
             break;
         case MESSAGE_TYPE_ORDER_EXECUTED:
             {
-            std::shared_ptr<OrderExecuted> orderExecuted = parseOrderExecutedBody(data);
-            test.insert(std::pair(orderExecuted -> matchNumber, header -> timestamp));
+            OrderExecuted* orderExecuted = parseOrderExecutedBody(data);
             // VWAPManager::getInstance().processOrderExecuted(header -> stockLocate, orderExecuted);
             // fmt::println("{},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
             }
             break;
         case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
             {
-            std::shared_ptr<OrderExecutedWithPrice> orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
-            test.insert(std::pair(orderExecutedWithPrice -> matchNumber, header -> timestamp));
+            OrderExecutedWithPrice* orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
             // VWAPManager::getInstance().processOrderExecutedWithPrice(header -> stockLocate, orderExecutedWithPrice);
             // fmt::println("{},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
             }
             break;
         case MESSAGE_TYPE_TRADE_NON_CROSS:
             {
-            std::shared_ptr<TradeNonCross> tradeNonCross = parseTradeNonCrossBody(data);
-            test.insert(std::pair(tradeNonCross -> matchNumber, header -> timestamp));
+            TradeNonCross* tradeNonCross = parseTradeNonCrossBody(data);
             // VWAPManager::getInstance().processTradeNonCross(header -> stockLocate, tradeNonCross);
             // fmt::println("{},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
             }
             break;
         case MESSAGE_TYPE_TRADE_CROSS:
             {
-            std::shared_ptr<CrossTrade> crossTrade = parseCrossTradeBody(data);
-            test.insert(std::pair(crossTrade -> matchNumber, header -> timestamp));
+            CrossTrade* crossTrade = parseCrossTradeBody(data);
             // VWAPManager::getInstance().processCrossTrade(header -> stockLocate, crossTrade);
             // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
             }
             break;
         case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
             {
-            std::shared_ptr<AddOrder> addOrder = parseAddOrderBody(data);
+            AddOrder* addOrder = parseAddOrderBody(data);
             // VWAPManager::getInstance().processAddOrder(header -> stockLocate, addOrder);
             // fmt::println("{},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
             }
             break;
         case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
             {
-            std::shared_ptr<AddOrderMPID> addOrderMPID = parseAddOrderMPIDBody(data);
+            AddOrderMPID* addOrderMPID = parseAddOrderMPIDBody(data);
             // VWAPManager::getInstance().processAddOrderMPID(header -> stockLocate, addOrderMPID);
             // fmt::println("{},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
             }
             break;
         case MESSAGE_TYPE_SYSTEM_EVENT:
             {
-            std::shared_ptr<SystemEvent> systemEvent = parseSystemEventBody(data);
-            // VWAPManager::getInstance().processSystemEvent(header -> stockLocate, systemEvent);
-            fmt::println("{}",systemEvent -> eventCode);
+            SystemEvent* systemEvent = parseSystemEventBody(data);
+            // fmt::println("{}",systemEvent -> eventCode);
+            switch(systemEvent -> eventCode) {
+                case EVENT_CODE_START_OF_MARKET_HOURS: // 1st Period has already started, start VWAP manager
+                    break;
+                case EVENT_CODE_END_OF_MARKET_HOURS:
+                    break;
+                case EVENT_CODE_END_OF_SYSTEM_HOURS: // All trade breaks have been accounted for, so output VWAP !
+                    break;
+                default: 
+                    break;
             }
+            // VWAPManager::getInstance().processSystemEvent(header -> stockLocate, systemEvent);            }
             break;
+            }
         case MESSAGE_TYPE_ORDER_CANCELLED:
             {
-            std::shared_ptr<OrderCancel> orderCancel = parseOrderCancelBody(data);
+            OrderCancel* orderCancel = parseOrderCancelBody(data);
             // VWAPManager::getInstance().processOrderCancel(header -> stockLocate, orderCancel);
             // fmt::println("{},{}",orderCancel -> originalOrderReferenceNumber, orderCancel -> cancelledShares);
             }
             break;
         case MESSAGE_TYPE_ORDER_DELETE:
             {
-            std::shared_ptr<OrderDelete> orderDelete = parseOrderDeleteBody(data);
+            OrderDelete* orderDelete = parseOrderDeleteBody(data);
             // VWAPManager::getInstance().processOrderDelete(header -> stockLocate, orderDelete);
             // fmt::println("{}", orderDelete -> originalOrderReferenceNumber); 
             }
             break;
         case MESSAGE_TYPE_ORDER_REPLACE:
             {
-            std::shared_ptr<OrderReplace> orderReplace = parseOrderReplaceBody(data);
+            OrderReplace* orderReplace = parseOrderReplaceBody(data);
             // VWAPManager::getInstance().processOrderReplace(header -> stockLocate, orderReplace);
             // fmt::println("{},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
             }
             break;
         case MESSAGE_TYPE_TRADE_BROKEN:
             {
-            std::shared_ptr<BrokenTradeOrOrderExecution> brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
-            fmt::println("Time: {}", header -> timestamp);
+            BrokenTradeOrOrderExecution* brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
             // VWAPManager::getInstance().processBrokenTradeOrOrderExecution(header -> stockLocate, brokenTradeOrOrderExecution);
             }
             break;

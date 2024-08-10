@@ -2,7 +2,6 @@
 #define TREXQUANTTAKEHOME_MESSAGES_ORDER_EXECUTED_WITH_PRICE_H_
 
 #include <cstdint>
-#include <memory>
 
 const std::size_t PRINTABLE_SIZE = 1;
 
@@ -15,6 +14,6 @@ struct OrderExecutedWithPrice {
     uint32_t executionPrice;
 };
 
-std::shared_ptr<OrderExecutedWithPrice> parseOrderExecutedWithPriceBody(const char* data);
+OrderExecutedWithPrice* parseOrderExecutedWithPriceBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_ORDER_EXECUTED_WITH_PRICE_H_

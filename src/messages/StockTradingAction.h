@@ -2,7 +2,6 @@
 #define TREXQUANTTAKEHOME_MESSAGES_STOCK_TRADING_ACTION_H_
 
 #include <string>
-#include <memory>
 #include <cstdint>
 
 // Trade state reason constants
@@ -24,6 +23,6 @@ struct StockTradingAction {
     std::string reason;
 };
 
-std::shared_ptr<StockTradingAction> parseStockTradingActionBody(const char* data);
+StockTradingAction* parseStockTradingActionBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_STOCK_TRADING_ACTION_H_

@@ -1,7 +1,7 @@
 #ifndef TREXQUANTTAKEHOME_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_
 #define TREXQUANTTAKEHOME_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_
 
-#include <memory>
+#include <cstdint>
 
 // Struct to store the Broken Trade or Order Execution message body
 struct BrokenTradeOrOrderExecution {
@@ -9,6 +9,6 @@ struct BrokenTradeOrOrderExecution {
 };
 
 // Parse the Broken Trade or Order Execution message body
-std::shared_ptr<BrokenTradeOrOrderExecution> parseBrokenTradeOrOrderExecutionBody(const char* data);
+BrokenTradeOrOrderExecution* parseBrokenTradeOrOrderExecutionBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_

@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <string>
-#include <memory>
 
 // const std::size_t BUY_SELL_INDICATOR_SIZE = 1; Initialized in AddOrder.h
 // const std::size_t STOCK_SIZE           = 8; Initialized in StockTradingAction.h
@@ -17,6 +16,6 @@ struct TradeNonCross {
     uint64_t matchNumber;
 };
 
-std::shared_ptr<TradeNonCross> parseTradeNonCrossBody(const char* data);
+TradeNonCross* parseTradeNonCrossBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_TRADE_NON_CROSS_H_

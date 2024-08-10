@@ -5,9 +5,6 @@
 
 #include <assert.h>
 
-// For internal class use
-const uint64_t VWAPManager::_NANOSECONDS_PER_HOUR = 3600000000000;
-
 // Singleton declaration and getter
 VWAPManager* VWAPManager::_instance = nullptr;
 VWAPManager& VWAPManager::getInstance() {
@@ -125,13 +122,6 @@ void VWAPManager::processTradeNonCross(uint16_t stockLocate, std::shared_ptr<Tra
 }
 
 /**
- * Returns true if an hour or more real time has passed
- */
-bool VWAPManager::isPeriodOver(uint64_t timestamp) {
-    return (timestamp - _startOfPeriodTimestamp) >= _NANOSECONDS_PER_HOUR;
-}
-
-/**
  * Execute when the current period expires for each issue.
  * 1. Calculate the VWAP and prepare for the next period
  * 2. File I/O
@@ -143,7 +133,7 @@ void VWAPManager::processEndOfPeriod(uint64_t timestamp) {
     // Need to write this period's VWAP to the file. 
     // Use the fmt::os library to handle this, it can be much better than standard IO
     // TODO: Find a nice way to print the timestamp in the filename. look into fmt::chrono
-    fmt::ostream vwapOutputFile = fmt::output_file(fmt::format("vwap_{}.txt", static_cast<float>(timestamp / _NANOSECONDS_PER_HOUR)));
+    fmt::ostream vwapOutputFile = fmt::output_file(fmt::format("vwap_{}.txt", timestamp));
 
     // <uint16_t, std::unique_ptr<VWAPPeriodicData>>
     // We can do this because no dependency on iteration order
@@ -158,9 +148,6 @@ void VWAPManager::processEndOfPeriod(uint64_t timestamp) {
         );
     }
     vwapOutputFile.close();
-
-    // Note when the new period starts
-    _startOfPeriodTimestamp = timestamp;
 }
 
 // ==================================== Private Functions ====================================

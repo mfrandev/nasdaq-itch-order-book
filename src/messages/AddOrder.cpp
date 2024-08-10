@@ -9,20 +9,20 @@
 /** 
  * Parse the AddOrder message body
  */
-std::shared_ptr<AddOrder> parseAddOrderBody(const char* data) {
-    static std::shared_ptr<AddOrder> addOrder = std::make_shared<AddOrder>();
+AddOrder* parseAddOrderBody(const char* data) {
+    static AddOrder addOrder;
     std::size_t offset = 0;
-    addOrder -> orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
+    addOrder.orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
-    std::memcpy(&(addOrder -> buySellIndicator), &data[offset], BUY_SELL_INDICATOR_SIZE);
+    std::memcpy(&(addOrder.buySellIndicator), &data[offset], BUY_SELL_INDICATOR_SIZE);
     offset += BUY_SELL_INDICATOR_SIZE;
-    addOrder -> shares = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
+    addOrder.shares = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
     offset += 4;
     char stock[STOCK_SIZE];
     std::memcpy(&stock[0], &data[offset], STOCK_SIZE);
-    addOrder -> stock = charStarToString(stock, STOCK_SIZE);
-    stripWhitespaceFromCPPString(addOrder -> stock);
+    addOrder.stock = charStarToString(stock, STOCK_SIZE);
+    stripWhitespaceFromCPPString(addOrder.stock);
     offset += STOCK_SIZE;
-    addOrder -> price = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
-    return addOrder;
+    addOrder.price = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
+    return &addOrder;
 }

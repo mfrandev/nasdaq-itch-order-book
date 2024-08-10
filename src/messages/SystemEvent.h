@@ -2,7 +2,6 @@
 #define TREXQUANTTAKEHOME_MESSAGES_SYSTEM_EVENT_H_
 
 #include <cstdint>
-#include <memory>
 
 // System Event Codes
 const char EVENT_CODE_START_OF_MESSAGES     = 'O';
@@ -19,6 +18,6 @@ struct SystemEvent {
     char eventCode;
 };
 
-std::shared_ptr<SystemEvent> parseSystemEventBody(const char* data);
+SystemEvent* parseSystemEventBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_SYSTEM_EVENT_H_

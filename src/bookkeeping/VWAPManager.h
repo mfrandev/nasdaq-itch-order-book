@@ -26,9 +26,9 @@
  */
 struct VWAPPeriodicData {
     std::string stock;
-    uint32_t highPrice;
-    uint32_t lowPrice;
-    uint32_t closingPrice;
+    uint32_t highPrice; // This needs to become a max_heap
+    uint32_t lowPrice; // This needs to become a min_heap
+    uint32_t closingPrice; // This needs to become a list
     uint64_t volume;
     bool isTrading; // Issues halted intraday will not be removed from VWAP report. Provide a mechanism to show whether or not the security is actively traded AT THE TIME OF THE REPORT.
 };
@@ -65,7 +65,6 @@ class VWAPManager {
         void processTradeNonCross(uint16_t stockLocate, std::shared_ptr<TradeNonCross> tradeNonCross);
 
         // Functions for controlling the VWAPManager's time related functionality
-        bool isPeriodOver(uint64_t timestamp);
         void processEndOfPeriod(uint64_t timestamp);
 
     private:
@@ -74,8 +73,6 @@ class VWAPManager {
         // Every order that is executed will be represented in these mappings. Should be maintained as same size.
         std::unordered_map<uint16_t, std::unique_ptr<VWAPPeriodicData>> _periodicStockLocateToData;
         std::unordered_map<uint16_t, std::unique_ptr<VWAPCumulativeData>> _cumulativeStockLocateToData;
-
-        uint64_t _startOfPeriodTimestamp;
 
         void _safeaddStockToPeriodicMap(uint16_t _stockLocate, const std::string& _stock);
         void _safeaddStockToCumulativeMap(uint16_t _stockLocate, const std::string& _stock);
@@ -89,14 +86,9 @@ class VWAPManager {
         // Actually calculate the VWAP
         uint32_t _calculateVWAPForStock(std::unique_ptr<VWAPCumulativeData>* _cumulativeData);
 
-        int _writeVWAPDataToFile();
-        
-        static const uint64_t _NANOSECONDS_PER_HOUR;
-
         explicit VWAPManager():
             _periodicStockLocateToData(),
-            _cumulativeStockLocateToData(),
-            _startOfPeriodTimestamp(0u)
+            _cumulativeStockLocateToData()
         {};
 };  
 

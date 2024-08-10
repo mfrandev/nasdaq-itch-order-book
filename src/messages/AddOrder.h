@@ -1,7 +1,6 @@
 #ifndef TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_H_
 #define TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_H_
 
-#include <memory>
 #include <string>
 #include <cstdint>
 
@@ -17,6 +16,6 @@ struct AddOrder {
     uint32_t price;
 };
 
-std::shared_ptr<AddOrder> parseAddOrderBody(const char* data);
+AddOrder* parseAddOrderBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_H_

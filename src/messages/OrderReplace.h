@@ -1,7 +1,7 @@
 #ifndef TREXQUANTTAKEHOME_MESSAGES_ORDER_REPLACE_H_
 #define TREXQUANTTAKEHOME_MESSAGES_ORDER_REPLACE_H_
 
-#include <memory>
+#include <cstdint>
 
 // Struct to store the Order Replace message body
 struct OrderReplace {
@@ -12,6 +12,6 @@ struct OrderReplace {
 };
 
 // Parse the order replace message body
-std::shared_ptr<OrderReplace> parseOrderReplaceBody(const char* data);
+OrderReplace* parseOrderReplaceBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_ORDER_REPLACE_H_

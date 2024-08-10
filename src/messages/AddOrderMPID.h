@@ -1,7 +1,6 @@
 #ifndef TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_MPID_H_
 #define TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_MPID_H_
 
-#include <memory>
 #include <string>
 #include <cstdint>
 
@@ -19,6 +18,6 @@ struct AddOrderMPID {
     std::string attribution;
 };
 
-std::shared_ptr<AddOrderMPID> parseAddOrderMPIDBody(const char* data);
+AddOrderMPID* parseAddOrderMPIDBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_MPID_H_

@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <string>
-#include <memory>
 
 // Struct for parsing the CrossTrade binary message
 struct CrossTrade {
@@ -14,6 +13,6 @@ struct CrossTrade {
     char crossType;
 };
 
-std::shared_ptr<CrossTrade> parseCrossTradeBody(const char* data);
+CrossTrade* parseCrossTradeBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_CROSS_TRADE_H_

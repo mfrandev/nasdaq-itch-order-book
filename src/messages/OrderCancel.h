@@ -1,7 +1,7 @@
 #ifndef TREXQUANTTAKEHOME_MESSAGES_ORDER_CANCEL_H_
 #define TREXQUANTTAKEHOME_MESSAGES_ORDER_CANCEL_H_
 
-#include <memory>
+#include <cstdint>
 
 // Struct to store the Order Cancel message body
 struct OrderCancel {
@@ -10,6 +10,6 @@ struct OrderCancel {
 };
 
 // Parse the order cancel message body
-std::shared_ptr<OrderCancel> parseOrderCancelBody(const char* data);
+OrderCancel* parseOrderCancelBody(const char* data);
 
 #endif // TREXQUANTTAKEHOME_MESSAGES_ORDER_CANCEL_H_
