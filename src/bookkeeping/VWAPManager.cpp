@@ -1,9 +1,9 @@
 #include <VWAPManager.h>
 
 #include <fmt/format.h>
+#include <fmt/os.h>
 
 #include <assert.h>
-#include <fstream>
 
 // For internal class use
 const uint64_t VWAPManager::_NANOSECONDS_PER_HOUR = 3600000000000;
@@ -14,6 +14,68 @@ VWAPManager& VWAPManager::getInstance() {
     if(_instance == nullptr) 
         _instance = new VWAPManager();
     return *_instance;
+}
+
+/**
+ * 
+ */
+void VWAPManager::processAddOrder(uint16_t stockLocate, std::shared_ptr<AddOrder> addOrder) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processAddOrderMPID(uint16_t stockLocate, std::shared_ptr<AddOrderMPID> addOrderMPID) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processBrokenTradeOrOrderExecution(uint16_t stockLocate, std::shared_ptr<BrokenTradeOrOrderExecution> brokenTradeOrOrderExecution) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processCrossTrade(uint16_t stockLocate, std::shared_ptr<CrossTrade> crossTrade) {
+
+} 
+/**
+ * 
+ */
+void VWAPManager::processOrderCancel(uint16_t stockLocate, std::shared_ptr<OrderCancel> orderCancel) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processOrderDelete(uint16_t stockLocate, std::shared_ptr<OrderDelete> orderDelete) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processOrderExecuted(uint16_t stockLocate, std::shared_ptr<OrderExecuted> orderExecuted) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processOrderExecutedWithPrice(uint16_t stockLocate, std::shared_ptr<OrderExecutedWithPrice> orderExecutedWithPrice) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processOrderReplace(uint16_t stockLocate, std::shared_ptr<OrderReplace> orderReplace) {
+
 }
 
 /**
@@ -49,6 +111,20 @@ void VWAPManager::unregisterStockWithVWAPManager(uint16_t stockLocate) {
 }
 
 /**
+ * 
+ */
+void VWAPManager::processSystemEvent(uint16_t stockLocate, std::shared_ptr<SystemEvent> systemEvent) {
+
+}
+
+/**
+ * 
+ */
+void VWAPManager::processTradeNonCross(uint16_t stockLocate, std::shared_ptr<TradeNonCross> tradeNonCross) {
+
+}
+
+/**
  * Returns true if an hour or more real time has passed
  */
 bool VWAPManager::isPeriodOver(uint64_t timestamp) {
@@ -64,11 +140,10 @@ void VWAPManager::processEndOfPeriod(uint64_t timestamp) {
     // If this assertion does not hold, something has gone horribly awry
     assert(_periodicStockLocateToData.size() == _cumulativeStockLocateToData.size());
 
-    // Need to write this period's VWAP to the file
-    std::ofstream vwapOutputFile;
-
-    // TODO: Find a nice way to print the timestamp in the filename
-    vwapOutputFile.open(fmt::format("vwap_{}.txt", static_cast<float>(timestamp / _NANOSECONDS_PER_HOUR)));
+    // Need to write this period's VWAP to the file. 
+    // Use the fmt::os library to handle this, it can be much better than standard IO
+    // TODO: Find a nice way to print the timestamp in the filename. look into fmt::chrono
+    fmt::ostream vwapOutputFile = fmt::output_file(fmt::format("vwap_{}.txt", static_cast<float>(timestamp / _NANOSECONDS_PER_HOUR)));
 
     // <uint16_t, std::unique_ptr<VWAPPeriodicData>>
     // We can do this because no dependency on iteration order
@@ -76,7 +151,7 @@ void VWAPManager::processEndOfPeriod(uint64_t timestamp) {
         std::unique_ptr<VWAPCumulativeData>* vwapCumulativeData = _getCumulativeData(stockLocateAndData.first);
         _addPeriodicDataToCumulativeDataAndReset(&stockLocateAndData.second, vwapCumulativeData);
         uint32_t vwap = _calculateVWAPForStock(vwapCumulativeData);
-        vwapOutputFile << fmt::format("{}: {}{}",
+        vwapOutputFile.print("{}: {}{}\n",
             stockLocateAndData.second -> stock,
             vwap,
             stockLocateAndData.second -> isTrading ? "" : ": H"

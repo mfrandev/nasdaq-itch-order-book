@@ -1,9 +1,10 @@
 #include <fstream>
 #include <vector>
 #include <fmt/format.h>
-#include <VWAPManager.h>
+
 #include <ProcessMessage.h>
 #include <MessageHeader.h>
+#include <iostream>
 
 /**
  * Parse and calculate a VWAP for a binary NASDAQ ITCH 5.0 file
@@ -27,17 +28,21 @@ int main() {
     // And here is the magic
     uint64_t counter = 0;
     while(file) {
+
+        // TODO: Test another file to see if this pattern holds
         // For some reason, there happens to be two leading bytes at the start of each line (maybe bad solution to another endienness problem ? it works though)
         file.read(buffer.data(), NUMBER_OF_BYTES_FOR_HEADER_CHUNK);
-        std::shared_ptr<BinaryMessageHeader> header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
-        
+        BinaryMessageHeader* header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
+        // std::cout << header << '\n';
         // if(header -> messageType == MESSAGE_TYPE_STOCK_TRADING_ACTION)
-            // fmt::println("{}. {} {} {} {}", ++counter, header -> messageType, header -> stockLocate, header -> trackingNumber, header -> timestamp);
+            // fmt::println("{}. {} {} {} {}", ++counter, (*header) -> messageType, (*header) -> stockLocate, (*header) -> trackingNumber, (*header) -> timestamp);
 
         // Get the message body 
-        std::size_t numberOfBytesForBody = messageTypeToNumberOfBytes(header -> messageType);
+        std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header -> messageType);
         file.read(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody);
-        parseAndProcessMessageBody(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, header);
+
+        // Highest level function call for maintaining books and calculating VWAP
+        ProcessMessage::parseAndProcessMessageBody(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, header);
         buffer.clear();
     }
 

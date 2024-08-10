@@ -6,11 +6,19 @@
 #include <string>
 #include <unordered_map>
 
-#include <StockTradingAction.h>
+#include <AddOrder.h>
+#include <AddOrderMPID.h>
+#include <BrokenTradeOrOrderExecution.h>
+#include <CrossTrade.h>
+#include <OrderCancel.h>
+#include <OrderDelete.h>
 #include <OrderExecuted.h>
 #include <OrderExecutedWithPrice.h>
+#include <OrderReplace.h>
+#include <StockTradingAction.h>
+#include <SystemEvent.h>
 #include <TradeNonCross.h>
-#include <CrossTrade.h>
+
 
 /**
  * Use this to trace stock price and volume per-period
@@ -40,14 +48,21 @@ class VWAPManager {
     public:
         static VWAPManager& getInstance();
 
-        // Add processing for each mesage
+        // Add processing for each mesage. Helper functions indented
+        void processAddOrder(uint16_t stockLocate, std::shared_ptr<AddOrder> addOrder);
+        void processAddOrderMPID(uint16_t stockLocate, std::shared_ptr<AddOrderMPID> addOrderMPID);
+        void processBrokenTradeOrOrderExecution(uint16_t stockLocate, std::shared_ptr<BrokenTradeOrOrderExecution> brokenTradeOrOrderExecution);
+        void processCrossTrade(uint16_t stockLocate, std::shared_ptr<CrossTrade> crossTrade); 
+        void processOrderCancel(uint16_t stockLocate, std::shared_ptr<OrderCancel> orderCancel);
+        void processOrderDelete(uint16_t stockLocate, std::shared_ptr<OrderDelete> orderDelete);
+        void processOrderExecuted(uint16_t stockLocate, std::shared_ptr<OrderExecuted> orderExecuted);
+        void processOrderExecutedWithPrice(uint16_t stockLocate, std::shared_ptr<OrderExecutedWithPrice> orderExecutedWithPrice);
+        void processOrderReplace(uint16_t stockLocate, std::shared_ptr<OrderReplace> orderReplace);
         void processStockTradingAction(uint16_t stockLocate, std::shared_ptr<StockTradingAction> stockTradingAction);
             void registerStockWithVWAPManager(uint16_t stockLocate, const std::string& stock);
             void unregisterStockWithVWAPManager(uint16_t stockLocate);
-        void processOrderExecuted(uint16_t stockLocate, std::shared_ptr<OrderExecuted> orderExecuted);
-        void processOrderExecutedWithPrice(uint16_t stockLocate, std::shared_ptr<OrderExecutedWithPrice> orderExecutedWithPrice);
+        void processSystemEvent(uint16_t stockLocate, std::shared_ptr<SystemEvent> systemEvent);
         void processTradeNonCross(uint16_t stockLocate, std::shared_ptr<TradeNonCross> tradeNonCross);
-        void processCrossTrade(uint16_t stockLocate, std::shared_ptr<CrossTrade> crossTrade);
 
         // Functions for controlling the VWAPManager's time related functionality
         bool isPeriodOver(uint64_t timestamp);
@@ -83,7 +98,6 @@ class VWAPManager {
             _cumulativeStockLocateToData(),
             _startOfPeriodTimestamp(0u)
         {};
-
 };  
 
 #endif // TREXQUANTTAKEHOME_BOOKKEEPING_VWAP_MANAGER_H
