@@ -33,6 +33,7 @@ class OrderBook {
 
         static OrderBook& getInstance();
 
+        // Functions for maintaining the book
         void addToActiveOrders(uint64_t orderReferenceNumber, uint16_t stockLocate, uint32_t numShares, uint32_t price);
         uint32_t executeActiveOrder(uint64_t orderReferenceNumber, uint32_t numExecutedShares, uint64_t matchNumber);
         void executeActiveOrderWithPrice(uint64_t orderReferenceNumber, uint32_t numExecutedShares, uint64_t matchNumber, uint32_t price);

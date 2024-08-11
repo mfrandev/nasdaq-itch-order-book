@@ -3,6 +3,7 @@
 #include <cassert>
 #include <fmt/format.h>
 
+#include <VWAPManager.h>
 #include <OrderBook.h>
 #include <AddOrder.h>
 #include <AddOrderMPID.h>
@@ -33,40 +34,6 @@ void ProcessMessage::parseAndProcessMessageBody(const char* data,  std::size_t b
 
     switch(header -> messageType) {
 
-        // Messages we need to handle
-        case MESSAGE_TYPE_STOCK_TRADING_ACTION: 
-            {
-            StockTradingAction* stockTradingAction = parseStockTradingActionBody(data);
-            // fmt::println("{},{},{},{}", stockTradingAction -> stock, stockTradingAction -> tradingState, stockTradingAction -> reserved, stockTradingAction -> reason);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_EXECUTED:
-            {
-            OrderExecuted* orderExecuted = parseOrderExecutedBody(data);
-            OrderBook::getInstance().executeActiveOrder(orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
-            // fmt::println("{},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
-            {
-            OrderExecutedWithPrice* orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
-            if(orderExecutedWithPrice -> printable)
-                OrderBook::getInstance().executeActiveOrderWithPrice(orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> executionPrice);
-            // fmt::println("{},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
-            }
-            break;
-        case MESSAGE_TYPE_TRADE_NON_CROSS:
-            {
-            TradeNonCross* tradeNonCross = parseTradeNonCrossBody(data);
-            // fmt::println("{},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
-            }
-            break;
-        case MESSAGE_TYPE_TRADE_CROSS:
-            {
-            CrossTrade* crossTrade = parseCrossTradeBody(data);
-            // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
-            }
-            break;
         case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
             {
             AddOrder* addOrder = parseAddOrderBody(data);
@@ -79,6 +46,60 @@ void ProcessMessage::parseAndProcessMessageBody(const char* data,  std::size_t b
             AddOrderMPID* addOrderMPID = parseAddOrderMPIDBody(data);
             OrderBook::getInstance().addToActiveOrders(addOrderMPID -> orderReferenceNumber, header -> stockLocate, addOrderMPID -> shares, addOrderMPID -> price);
             // fmt::println("Adding: {},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
+            }
+            break;
+        case MESSAGE_TYPE_TRADE_BROKEN:
+            {
+            BrokenTradeOrOrderExecution* brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
+            }
+            break;
+        case MESSAGE_TYPE_TRADE_CROSS:
+            {
+            CrossTrade* crossTrade = parseCrossTradeBody(data);
+            // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_CANCELLED:
+            {
+            OrderCancel* orderCancel = parseOrderCancelBody(data);
+            OrderBook::getInstance().cancelActiveOrder(orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
+            // fmt::println("{},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_DELETE:
+            {
+            OrderDelete* orderDelete = parseOrderDeleteBody(data);
+            // fmt::println("Deleting: {}", orderDelete -> orderReferenceNumber); 
+            OrderBook::getInstance().deleteActiveOrder(orderDelete -> orderReferenceNumber);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_EXECUTED:
+            {
+            OrderExecuted* orderExecuted = parseOrderExecutedBody(data);
+            VWAPManager::getInstance().handleOrderExecuted(header -> timestamp, header -> stockLocate, orderExecuted);
+            // fmt::println("{},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
+            {
+            OrderExecutedWithPrice* orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
+            VWAPManager::getInstance().handleOrderExecutedWithPrice(header -> timestamp, header -> stockLocate, orderExecutedWithPrice);
+            // fmt::println("{},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
+            }
+            break;
+        case MESSAGE_TYPE_ORDER_REPLACE:
+            {
+            OrderReplace* orderReplace = parseOrderReplaceBody(data);
+            OrderBook::getInstance().replaceActiveOrder(orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
+            // fmt::println("{},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
+            }
+            break;
+        // Messages we need to handle
+        case MESSAGE_TYPE_STOCK_TRADING_ACTION: 
+            {
+            StockTradingAction* stockTradingAction = parseStockTradingActionBody(data);
+            VWAPManager::getInstance().handleStockTradingAction(header -> stockLocate, stockTradingAction);
+            // fmt::println("{},{},{},{}", stockTradingAction -> stock, stockTradingAction -> tradingState, stockTradingAction -> reserved, stockTradingAction -> reason);
             }
             break;
         case MESSAGE_TYPE_SYSTEM_EVENT:
@@ -97,30 +118,10 @@ void ProcessMessage::parseAndProcessMessageBody(const char* data,  std::size_t b
             }
             break;
             }
-        case MESSAGE_TYPE_ORDER_CANCELLED:
+        case MESSAGE_TYPE_TRADE_NON_CROSS:
             {
-            OrderCancel* orderCancel = parseOrderCancelBody(data);
-            OrderBook::getInstance().cancelActiveOrder(orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
-            // fmt::println("{},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_DELETE:
-            {
-            OrderDelete* orderDelete = parseOrderDeleteBody(data);
-            // fmt::println("Deleting: {}", orderDelete -> orderReferenceNumber); 
-            OrderBook::getInstance().deleteActiveOrder(orderDelete -> orderReferenceNumber);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_REPLACE:
-            {
-            OrderReplace* orderReplace = parseOrderReplaceBody(data);
-            OrderBook::getInstance().replaceActiveOrder(orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
-            // fmt::println("{},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
-            }
-            break;
-        case MESSAGE_TYPE_TRADE_BROKEN:
-            {
-            BrokenTradeOrOrderExecution* brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
+            TradeNonCross* tradeNonCross = parseTradeNonCrossBody(data);
+            // fmt::println("{},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
             }
             break;
 
