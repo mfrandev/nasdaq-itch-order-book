@@ -34,16 +34,12 @@ class OrderBook {
         static OrderBook& getInstance();
 
         void addToActiveOrders(uint64_t orderReferenceNumber, uint16_t stockLocate, uint32_t numShares, uint32_t price);
-        void executeActiveOrder(uint64_t orderReferenceNumber, uint32_t numExecutedShares, uint64_t matchNumber);
+        uint32_t executeActiveOrder(uint64_t orderReferenceNumber, uint32_t numExecutedShares, uint64_t matchNumber);
         void executeActiveOrderWithPrice(uint64_t orderReferenceNumber, uint32_t numExecutedShares, uint64_t matchNumber, uint32_t price);
         void cancelActiveOrder(uint64_t orderReferenceNumber, uint32_t numCancelledShares);
         void deleteActiveOrder(uint64_t orderReferenceNumber);
         void replaceActiveOrder(uint64_t originalOrderReferenceNumber, uint64_t newOrderReferenceNumber, uint32_t newNumShares, uint32_t newPrice);
-
-        void trackExecutedTrade(uint64_t matchNumber, uint16_t stockLocate, uint32_t numShares, uint32_t price);
-        ExecutedOrderOrTradeData* handleBrokenOrderOrTrade(uint64_t matchNumber);
-
-
+        
     private:
 
         static OrderBook* _instance;
@@ -54,15 +50,6 @@ class OrderBook {
          * 3. Using raw pointers again because I am still scared of RAII overhead
          */
         std::unordered_map<uint64_t, ActiveOrderData*> _activeOrdersBook;
-
-        /** 
-         * 1. This maps a Match Number to an executed or partially executed order
-         * 2. This book is absolutely necessary for retroactively updateing VWAP after a broken trade (only case when this mapping is modified)
-         * 3. Using a raw pointer here because freeing any cancelled orders during the broken trade handler is simple enough
-         * 4. Entries in this map come from all reporting periods.
-         */ 
-        std::unordered_map<uint64_t, ExecutedOrderOrTradeData*> _executedOrdersBook;
-
 
 };
 

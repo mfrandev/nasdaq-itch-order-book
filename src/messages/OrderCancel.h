@@ -5,7 +5,7 @@
 
 // Struct to store the Order Cancel message body
 struct OrderCancel {
-    uint64_t originalOrderReferenceNumber;
+    uint64_t orderReferenceNumber;
     uint32_t cancelledShares;
 };
 

@@ -5,7 +5,7 @@
 
 // Struct to store the Order Delete message body
 struct OrderDelete {
-    uint64_t originalOrderReferenceNumber;
+    uint64_t orderReferenceNumber;
 };
 
 // Parse the order delete message body
