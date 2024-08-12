@@ -62,6 +62,7 @@ void VWAPManager::handleBrokenTrade(uint16_t stockLocate, BrokenTradeOrOrderExec
  * Handle cross trade message
  */
 void VWAPManager::handleCrossTrade(uint64_t timestamp, uint16_t stockLocate, CrossTrade* crossTrade) {
+    if(crossTrade -> shares == 0) return;
     _handleOrderOrTradeExecuted(stockLocate, crossTrade -> crossPrice, crossTrade -> shares, timestamp, crossTrade -> matchNumber);
 }
 
