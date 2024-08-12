@@ -2,8 +2,9 @@
 #define TREXQUANTTAKEHOME_MESSAGES_ORDER_EXECUTED_WITH_PRICE_H_
 
 #include <cstdint>
+#include <stdlib.h>
 
-const std::size_t PRINTABLE_SIZE = 1;
+const size_t PRINTABLE_SIZE = 1;
 
 // Store all other fields for the OrderExecutedWithPrice message here
 struct OrderExecutedWithPrice {

@@ -9,7 +9,7 @@
  */
 StockTradingAction* parseStockTradingActionBody(const char* data) {
     static StockTradingAction stockTradingAction;
-    std::size_t offset = 0;
+    size_t offset = 0;
 
     // Store bytes for stock in a temp variable, copy over to a cpp string after
     char stock[STOCK_SIZE];

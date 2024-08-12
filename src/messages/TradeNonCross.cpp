@@ -12,7 +12,7 @@
  */
 TradeNonCross* parseTradeNonCrossBody(const char* data) {
     static TradeNonCross tradeNonCross;
-    std::size_t offset = 0;
+    size_t offset = 0;
     tradeNonCross.orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
     std::memcpy(&(tradeNonCross.buySellIndicator), &data[offset], BUY_SELL_INDICATOR_SIZE);

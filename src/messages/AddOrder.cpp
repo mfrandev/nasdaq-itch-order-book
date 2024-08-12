@@ -11,7 +11,7 @@
  */
 AddOrder* parseAddOrderBody(const char* data) {
     static AddOrder addOrder;
-    std::size_t offset = 0;
+    size_t offset = 0;
     addOrder.orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
     std::memcpy(&(addOrder.buySellIndicator), &data[offset], BUY_SELL_INDICATOR_SIZE);

@@ -21,13 +21,16 @@ My project uses one third party library that is unrelated to the problem domain.
 
 ## Usage:
 <ol>
-    <li>Dependencies: An internet connection (fmt lib comes from a remote repository), CMake (within the version range 3.15...3.25), and a C++ 17 compiler.</li>
+    <li>Dependencies: An internet connection (fmt lib comes from a remote repository), CMake (within the version range 3.15...3.25), and a CXX 17 compatible compiler.</li>
     <li>Compiling: From the project's <em><b>root directory</b></em>, I recommend running <b>./buildandrunit.sh</b>. This calls both the buildit.sh and runit.sh scripts consecutively.</li>
     <li>Using other ITCH files: First, place an unzipped ITCH file in "ITCHFiles." Then, go into the <b>runit.sh</b> script and replace "./trexquant_take_home" with "./trexquant_take_home [Filename-In-ITCHFiles]." Do not specify more than 1 file per-execution.</li>
     <li>By default, the program will try to read "ITCHFiles/01302019.NASDAQ_ITCH50"</li>
 </ol>
 
 ## Hardware I've Tested On:
+<ol>
+    <li>MacOS Monterrey: 2017 13-Inch MacbookAir, 1.8 GHz Intel Core i5 dual processor, 8 GB 1600 MHz DDR3 Memory. Compiler: AppleClang 13.0.0.13000027. Total execution time: </li>
+</ol>
 
 ## Implementation Notes:
 <ol>

@@ -7,7 +7,7 @@
  */
 OrderReplace* parseOrderReplaceBody(const char* data) {
     static OrderReplace orderReplace;
-    std::size_t offset = 0;
+    size_t offset = 0;
     orderReplace.originalOrderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
     orderReplace.newOrderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int

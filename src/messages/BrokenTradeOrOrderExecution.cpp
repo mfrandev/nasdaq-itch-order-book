@@ -7,7 +7,7 @@
  */
 BrokenTradeOrOrderExecution* parseBrokenTradeOrOrderExecutionBody(const char* data) {
     static BrokenTradeOrOrderExecution brokenTradeOrOrderExecution;
-    std::size_t offset = 0;
+    size_t offset = 0;
     brokenTradeOrOrderExecution.matchNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     return &brokenTradeOrOrderExecution;
 }

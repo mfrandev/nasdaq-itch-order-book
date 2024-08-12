@@ -9,7 +9,7 @@
 /**
  * Although not necessary, I like knowing I have this utility
  */
-std::string charStarToString(const char* data, std::size_t size);
+std::string charStarToString(const char* data, size_t size);
 
 /**
  * This utility removes all whitespace from a cpp string in-place

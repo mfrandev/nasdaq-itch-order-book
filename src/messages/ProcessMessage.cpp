@@ -24,7 +24,7 @@ extern uint8_t currentPeriod;
 
 uint64_t marketClosedTimestamp = 0;
 
-void ProcessMessage::parseAndProcessMessageBody(const char *data, std::size_t bytesToRead, BinaryMessageHeader *header)
+void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesToRead, BinaryMessageHeader *header)
 {
 
     // Check if the hour has changed and handle things appropriately

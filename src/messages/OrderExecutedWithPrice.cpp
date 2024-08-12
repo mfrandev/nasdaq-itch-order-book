@@ -9,7 +9,7 @@
  */
 OrderExecutedWithPrice* parseOrderExecutedWithPriceBody(const char* data) {
     static OrderExecutedWithPrice orderExecutedWithPrice;
-    std::size_t offset = 0;
+    size_t offset = 0;
     orderExecutedWithPrice.orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is 8 bytes
     offset += 8;
     orderExecutedWithPrice.executedShares = toHostEndianUpTo64(&data[offset], 4); // We know this is 4 bytes

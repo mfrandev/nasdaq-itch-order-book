@@ -11,7 +11,7 @@
  */
 CrossTrade* parseCrossTradeBody(const char* data) {
     static CrossTrade crossTrade;
-    std::size_t offset = 0;
+    size_t offset = 0;
     crossTrade.shares = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
     char stock[STOCK_SIZE];

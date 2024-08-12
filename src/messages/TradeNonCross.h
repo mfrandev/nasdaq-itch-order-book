@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <string>
 
-// const std::size_t BUY_SELL_INDICATOR_SIZE = 1; Initialized in AddOrder.h
-// const std::size_t STOCK_SIZE           = 8; Initialized in StockTradingAction.h
+// const size_t BUY_SELL_INDICATOR_SIZE = 1; Initialized in AddOrder.h
+// const size_t STOCK_SIZE           = 8; Initialized in StockTradingAction.h
 // For parsing a Trade (non-cross) message
 struct TradeNonCross {
     uint64_t orderReferenceNumber;

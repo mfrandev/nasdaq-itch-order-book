@@ -4,9 +4,9 @@
 #include <string>
 #include <cstdint>
 
-// const std::size_t BUY_SELL_INDICATOR_SIZE = 1; Use the value from AddOrder.h
-// const std::size_t STOCK_SIZE = 8; Use the value from StockTradingAction.h
-const std::size_t ATTRIBUTION_SIZE = 4;
+// const size_t BUY_SELL_INDICATOR_SIZE = 1; Use the value from AddOrder.h
+// const size_t STOCK_SIZE = 8; Use the value from StockTradingAction.h
+const size_t ATTRIBUTION_SIZE = 4;
 
 // Store the Add Order MPID message body
 struct AddOrderMPID {

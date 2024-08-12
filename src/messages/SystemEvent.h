@@ -2,6 +2,7 @@
 #define TREXQUANTTAKEHOME_MESSAGES_SYSTEM_EVENT_H_
 
 #include <cstdint>
+#include <stdlib.h>
 
 // System Event Codes
 const char EVENT_CODE_START_OF_MESSAGES     = 'O';
@@ -11,7 +12,7 @@ const char EVENT_CODE_END_OF_MARKET_HOURS   = 'M';
 const char EVENT_CODE_END_OF_SYSTEM_HOURS   = 'E';
 const char EVENT_CODE_END_OF_MESSAGES       = 'C';
 
-const std::size_t EVENT_CODE_SIZE = 1;
+const size_t EVENT_CODE_SIZE = 1;
 
 // Struct for storing the System Event message body
 struct SystemEvent {

@@ -82,6 +82,6 @@ const size_t MESSAGE_SIZE_DLCR_PRICE_DISCOVERY        = 37; // 1.8
 namespace ProcessMessage {
     size_t messageTypeToNumberOfBytes(char messageType);
 
-    void parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, BinaryMessageHeader* header);
+    void parseAndProcessMessageBody(const char* data,  size_t bytesToRead, BinaryMessageHeader* header);
 }
 #endif //TREXQUANTTAKEHOME_MESSAGES_PROCESS_MESSAGE_H_

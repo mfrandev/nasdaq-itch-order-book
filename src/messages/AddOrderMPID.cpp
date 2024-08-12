@@ -12,7 +12,7 @@
  */
 AddOrderMPID* parseAddOrderMPIDBody(const char* data) {
     static AddOrderMPID addOrderMPID;
-    std::size_t offset = 0;
+    size_t offset = 0;
     addOrderMPID.orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
     std::memcpy(&(addOrderMPID.buySellIndicator), &data[offset], BUY_SELL_INDICATOR_SIZE);

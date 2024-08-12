@@ -11,10 +11,10 @@ const char TRADING_STATE_REASON_QUOTATION         = 'Q';
 const char TRADING_STATE_REASON_TRADING_ON_NASDAQ = 'T';
 
 // Stock trading action message body
-const std::size_t STOCK_SIZE         = 8;
-const std::size_t TRADING_STATE_SIZE = 1;
-const std::size_t RESERVED_SIZE      = 1;
-const std::size_t REASON_SIZE        = 4;
+const size_t STOCK_SIZE         = 8;
+const size_t TRADING_STATE_SIZE = 1;
+const size_t RESERVED_SIZE      = 1;
+const size_t REASON_SIZE        = 4;
 
 struct StockTradingAction {
     std::string stock;
