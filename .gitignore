@@ -5,3 +5,6 @@
 
 **/.vscode/
 **/*Output
+!LiveOutput/
+**/vwap_*
+!**/vwap_placeholder.txt

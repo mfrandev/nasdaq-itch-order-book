@@ -29,7 +29,8 @@ My project uses one third party library that is unrelated to the problem domain.
 
 ## Hardware I've Tested On:
 <ol>
-    <li>MacOS Monterrey: 2017 13-Inch MacbookAir, 1.8 GHz Intel Core i5 dual processor, 8 GB 1600 MHz DDR3 Memory. Compiler: AppleClang 13.0.0.13000027. Total execution time: </li>
+    <li>(Main Workstation) Dell XPS 8950<br>Fedora Linux 40<br>12th Gen Intel Core i7-12700 (X86_64) <br>Compiler: GNU 14.2.1<br>Total execution time: 127 seconds</li><br>
+    <li>(Other Laptop) 2017 13-Inch MacbookAir<br> MacOS Monterrey<br>1.8 GHz Intel Core i5 dual processor<br>Compiler: AppleClang 13.0.0.13000027<br>Total execution time: 600s</li>
 </ol>
 
 ## Implementation Notes:

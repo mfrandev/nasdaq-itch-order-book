@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
     auto end = std::chrono::system_clock::now();
     // Convert nanos to seconds
-    fmt::println("======== Total program execution time: {} seconds ========", static_cast<double>((end - start).count() / 1000000000));
+    fmt::println("======== Total program execution time: {} seconds ========", static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(end - start).count()));
 
     return 0;
 }
