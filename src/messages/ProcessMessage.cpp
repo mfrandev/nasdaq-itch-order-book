@@ -20,202 +20,226 @@
 
 #include <time_utils.h>
 
-void ProcessMessage::parseAndProcessMessageBody(const char* data,  std::size_t bytesToRead, BinaryMessageHeader* header) {
+extern uint8_t currentPeriod;
+
+uint64_t marketClosedTimestamp = 0;
+
+void ProcessMessage::parseAndProcessMessageBody(const char *data, std::size_t bytesToRead, BinaryMessageHeader *header)
+{
 
     // Check if the hour has changed and handle things appropriately
-    uint8_t periodOfThisMessage = getCurrentPeriodFromTimestamp(header -> timestamp);
-    if(periodOfThisMessage != currentPeriod) {
-        // TODO: Tell the bookkeepers to transition to the next period
-        
+    uint8_t periodOfThisMessage = getCurrentPeriodFromTimestamp(header->timestamp);
+    if (periodOfThisMessage != currentPeriod)
+    {
+
         // No need to continue keeping track of reporting period if market hours are done
-        if(periodOfThisMessage < NUMBER_OF_PERIODS_PER_DAY)
+        if (periodOfThisMessage < NUMBER_OF_PERIODS_PER_DAY) {
+            fmt::println("Timestamp: {} Moving from period {} to period {}", header -> timestamp, currentPeriod, periodOfThisMessage);
             currentPeriod = periodOfThisMessage;
+        }
     }
 
-    switch(header -> messageType) {
+    switch (header->messageType)
+    {
 
-        case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
-            {
-            AddOrder* addOrder = parseAddOrderBody(data);
-            OrderBook::getInstance().addToActiveOrders(addOrder -> orderReferenceNumber, header -> stockLocate, addOrder -> shares, addOrder -> price);
-            // fmt::println("Adding: {},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
-            }
-            break;
-        case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
-            {
-            AddOrderMPID* addOrderMPID = parseAddOrderMPIDBody(data);
-            OrderBook::getInstance().addToActiveOrders(addOrderMPID -> orderReferenceNumber, header -> stockLocate, addOrderMPID -> shares, addOrderMPID -> price);
-            // fmt::println("Adding: {},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
-            }
-            break;
-        case MESSAGE_TYPE_TRADE_BROKEN:
-            {
-            BrokenTradeOrOrderExecution* brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
-            }
-            break;
-        case MESSAGE_TYPE_TRADE_CROSS:
-            {
-            CrossTrade* crossTrade = parseCrossTradeBody(data);
-            // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_CANCELLED:
-            {
-            OrderCancel* orderCancel = parseOrderCancelBody(data);
-            OrderBook::getInstance().cancelActiveOrder(orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
-            // fmt::println("{},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_DELETE:
-            {
-            OrderDelete* orderDelete = parseOrderDeleteBody(data);
-            // fmt::println("Deleting: {}", orderDelete -> orderReferenceNumber); 
-            OrderBook::getInstance().deleteActiveOrder(orderDelete -> orderReferenceNumber);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_EXECUTED:
-            {
-            OrderExecuted* orderExecuted = parseOrderExecutedBody(data);
-            VWAPManager::getInstance().handleOrderExecuted(header -> timestamp, header -> stockLocate, orderExecuted);
-            // fmt::println("{},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
-            {
-            OrderExecutedWithPrice* orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
-            VWAPManager::getInstance().handleOrderExecutedWithPrice(header -> timestamp, header -> stockLocate, orderExecutedWithPrice);
-            // fmt::println("{},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
-            }
-            break;
-        case MESSAGE_TYPE_ORDER_REPLACE:
-            {
-            OrderReplace* orderReplace = parseOrderReplaceBody(data);
-            OrderBook::getInstance().replaceActiveOrder(orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
-            // fmt::println("{},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
-            }
-            break;
-        // Messages we need to handle
-        case MESSAGE_TYPE_STOCK_TRADING_ACTION: 
-            {
-            StockTradingAction* stockTradingAction = parseStockTradingActionBody(data);
-            VWAPManager::getInstance().handleStockTradingAction(header -> stockLocate, stockTradingAction);
-            // fmt::println("{},{},{},{}", stockTradingAction -> stock, stockTradingAction -> tradingState, stockTradingAction -> reserved, stockTradingAction -> reason);
-            }
-            break;
-        case MESSAGE_TYPE_SYSTEM_EVENT:
-            {
-            SystemEvent* systemEvent = parseSystemEventBody(data);
-            // fmt::println("{}",systemEvent -> eventCode);
-            switch(systemEvent -> eventCode) {
-                case EVENT_CODE_START_OF_MARKET_HOURS: // 1st Period has already started, start VWAP manager
-                    break;
-                case EVENT_CODE_END_OF_MARKET_HOURS:
-                    break;
-                case EVENT_CODE_END_OF_SYSTEM_HOURS: // All trade breaks have been accounted for, so output VWAP !
-                    break;
-                default: 
-                    break;
-            }
-            break;
-            }
-        case MESSAGE_TYPE_TRADE_NON_CROSS:
-            {
-            TradeNonCross* tradeNonCross = parseTradeNonCrossBody(data);
-            // fmt::println("{},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
-            }
-            break;
+    case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
+    {
+        // if(!isAfterHours()) return;
+        AddOrder *addOrder = parseAddOrderBody(data);
+        OrderBook::getInstance().addToActiveOrders(addOrder->orderReferenceNumber, header->stockLocate, addOrder->shares, addOrder->price);
+        // fmt::println("Adding: {},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
+    }
+    break;
+    case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
+    {
+        // if(!isAfterHours()) return;
+        AddOrderMPID *addOrderMPID = parseAddOrderMPIDBody(data);
+        OrderBook::getInstance().addToActiveOrders(addOrderMPID->orderReferenceNumber, header->stockLocate, addOrderMPID->shares, addOrderMPID->price);
+        // fmt::println("Adding: {},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
+    }
+    break;
+    case MESSAGE_TYPE_TRADE_BROKEN:
+    {
+        BrokenTradeOrOrderExecution *brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
+        VWAPManager::getInstance().handleBrokenTrade(header -> stockLocate, brokenTradeOrOrderExecution);
+        // fmt::println("There were {} broken trades", erroneousCounter);
+    }
+    break;
+    case MESSAGE_TYPE_TRADE_CROSS:
+    {
+        if(isAfterHours()) return;
+        CrossTrade *crossTrade = parseCrossTradeBody(data);
+        VWAPManager::getInstance().handleCrossTrade(header->timestamp, header->stockLocate, crossTrade);
+        // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
+    }
+    break;
+    case MESSAGE_TYPE_ORDER_CANCELLED:
+    {
+        // if(!isAfterHours()) return;
+        OrderCancel *orderCancel = parseOrderCancelBody(data);
+        OrderBook::getInstance().cancelActiveOrder(orderCancel->orderReferenceNumber, orderCancel->cancelledShares);
+        // fmt::println("{},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
+    }
+    break;
+    case MESSAGE_TYPE_ORDER_DELETE:
+    {
+        // if(!isAfterHours()) return;
+        OrderDelete *orderDelete = parseOrderDeleteBody(data);
+        // fmt::println("Deleting: {}", orderDelete -> orderReferenceNumber);
+        OrderBook::getInstance().deleteActiveOrder(orderDelete->orderReferenceNumber);
+    }
+    break;
+    case MESSAGE_TYPE_ORDER_EXECUTED:
+    {
+        if(isAfterHours()) return;
+        OrderExecuted *orderExecuted = parseOrderExecutedBody(data);
+        VWAPManager::getInstance().handleOrderExecuted(header->timestamp, header->stockLocate, orderExecuted);
+        // fmt::println("{},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
+    }
+    break;
+    case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
+    {
+        if(isAfterHours()) return;
+        OrderExecutedWithPrice *orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
+        VWAPManager::getInstance().handleOrderExecutedWithPrice(header->timestamp, header->stockLocate, orderExecutedWithPrice);
+        // fmt::println("{},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
+    }
+    break;
+    case MESSAGE_TYPE_ORDER_REPLACE:
+    {
+        // if(!isAfterHours()) return;
+        OrderReplace *orderReplace = parseOrderReplaceBody(data);
+        OrderBook::getInstance().replaceActiveOrder(orderReplace->originalOrderReferenceNumber, orderReplace->newOrderReferenceNumber, orderReplace->shares, orderReplace->price);
+        // fmt::println("{},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
+    }
+    break;
+    // Messages we need to handle
+    case MESSAGE_TYPE_STOCK_TRADING_ACTION:
+    {
+        // if(!isAfterHours()) return;
+        StockTradingAction *stockTradingAction = parseStockTradingActionBody(data);
+        VWAPManager::getInstance().handleStockTradingAction(header->stockLocate, stockTradingAction);
+        // fmt::println("StockLocate {}: {},{},{},{}", header->stockLocate, stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
+    }
+    break;
+    case MESSAGE_TYPE_SYSTEM_EVENT:
+    {
+        SystemEvent* systemEvent = parseSystemEventBody(data);
+        // fmt::println("{}",systemEvent -> eventCode);
+        // Prodce the output
+        switch(systemEvent -> eventCode) {
+            case EVENT_CODE_END_OF_MARKET_HOURS:
+                closeMarket();
+                break;
 
-        default:
-            break;
+            case EVENT_CODE_END_OF_SYSTEM_HOURS:
+                VWAPManager::getInstance().outputBrokenTradeAdjustedVWAP();
+                break;
+        }
+        
+    }
+    case MESSAGE_TYPE_TRADE_NON_CROSS:
+    {
+        if(isAfterHours()) return;
+        TradeNonCross *tradeNonCross = parseTradeNonCrossBody(data);
+        VWAPManager::getInstance().handleTrade(header->timestamp, header->stockLocate, tradeNonCross);
+        // fmt::println("{},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
+    }
+    break;
+
+    default:
+        break;
     }
 }
 
 /**
  * Given a message type, return how many bytes its body is
  */
-size_t ProcessMessage::messageTypeToNumberOfBytes(char messageType) {
+size_t ProcessMessage::messageTypeToNumberOfBytes(char messageType)
+{
     size_t messageSize;
-    switch(messageType) {
-        case MESSAGE_TYPE_SYSTEM_EVENT:
-            messageSize = MESSAGE_SIZE_SYSTEM_EVENT;
-            break;
+    switch (messageType)
+    {
+    case MESSAGE_TYPE_SYSTEM_EVENT:
+        messageSize = MESSAGE_SIZE_SYSTEM_EVENT;
+        break;
 
-        case MESSAGE_TYPE_STOCK_DIRECTORY:
-            messageSize = MESSAGE_SIZE_STOCK_DIRECTORY;
-            break;
-        case MESSAGE_TYPE_STOCK_TRADING_ACTION:
-            messageSize = MESSAGE_SIZE_STOCK_TRADING_ACTION;
-            break;
-        case MESSAGE_TYPE_REG_SHO:
-            messageSize = MESSAGE_SIZE_REG_SHO;
-            break;
-        case MESSAGE_TYPE_MARKET_PARTICIPANT_POSITION:
-            messageSize = MESSAGE_SIZE_MARKET_PARTICIPANT_POSITION;
-            break;
-        case MESSAGE_TYPE_MWCB_DECLINE_LEVEL:
-            messageSize = MESSAGE_SIZE_MWCB_DECLINE_LEVEL;
-            break;
-        case MESSAGE_TYPE_MWCB_STATUS:
-            messageSize = MESSAGE_SIZE_MWCB_STATUS;
-            break;
-        case MESSAGE_TYPE_QUOTING_PERIOD_UPDATE:
-            messageSize = MESSAGE_SIZE_QUOTING_PERIOD_UPDATE;
-            break;
-        case MESSAGE_TYPE_LULD_AUCTION_COLLAR:
-            messageSize = MESSAGE_SIZE_LULD_AUCTION_COLLAR;
-            break;
-        case MESSAGE_TYPE_OPERATIONAL_HALT:
-            messageSize = MESSAGE_SIZE_OPERATIONAL_HALT ;
-            break;
+    case MESSAGE_TYPE_STOCK_DIRECTORY:
+        messageSize = MESSAGE_SIZE_STOCK_DIRECTORY;
+        break;
+    case MESSAGE_TYPE_STOCK_TRADING_ACTION:
+        messageSize = MESSAGE_SIZE_STOCK_TRADING_ACTION;
+        break;
+    case MESSAGE_TYPE_REG_SHO:
+        messageSize = MESSAGE_SIZE_REG_SHO;
+        break;
+    case MESSAGE_TYPE_MARKET_PARTICIPANT_POSITION:
+        messageSize = MESSAGE_SIZE_MARKET_PARTICIPANT_POSITION;
+        break;
+    case MESSAGE_TYPE_MWCB_DECLINE_LEVEL:
+        messageSize = MESSAGE_SIZE_MWCB_DECLINE_LEVEL;
+        break;
+    case MESSAGE_TYPE_MWCB_STATUS:
+        messageSize = MESSAGE_SIZE_MWCB_STATUS;
+        break;
+    case MESSAGE_TYPE_QUOTING_PERIOD_UPDATE:
+        messageSize = MESSAGE_SIZE_QUOTING_PERIOD_UPDATE;
+        break;
+    case MESSAGE_TYPE_LULD_AUCTION_COLLAR:
+        messageSize = MESSAGE_SIZE_LULD_AUCTION_COLLAR;
+        break;
+    case MESSAGE_TYPE_OPERATIONAL_HALT:
+        messageSize = MESSAGE_SIZE_OPERATIONAL_HALT;
+        break;
 
-        case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
-            messageSize = MESSAGE_SIZE_ADD_ORDER_NO_MPID;
-            break;
-        case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
-            messageSize = MESSAGE_SIZE_ADD_ORDER_WITH_MPID;
-            break;
+    case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
+        messageSize = MESSAGE_SIZE_ADD_ORDER_NO_MPID;
+        break;
+    case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
+        messageSize = MESSAGE_SIZE_ADD_ORDER_WITH_MPID;
+        break;
 
-        case MESSAGE_TYPE_ORDER_EXECUTED:
-            messageSize = MESSAGE_SIZE_ORDER_EXECUTED;
-            break;
-        case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
-            messageSize = MESSAGE_SIZE_ORDER_EXECUTED_WITH_PRICE;
-            break;
-        case MESSAGE_TYPE_ORDER_CANCELLED:
-            messageSize = MESSAGE_SIZE_ORDER_CANCELLED;
-            break;
-        case MESSAGE_TYPE_ORDER_DELETE:
-            messageSize = MESSAGE_SIZE_ORDER_DELETE;
-            break;
-        case MESSAGE_TYPE_ORDER_REPLACE:
-            messageSize = MESSAGE_SIZE_ORDER_REPLACE;
-            break;
+    case MESSAGE_TYPE_ORDER_EXECUTED:
+        messageSize = MESSAGE_SIZE_ORDER_EXECUTED;
+        break;
+    case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
+        messageSize = MESSAGE_SIZE_ORDER_EXECUTED_WITH_PRICE;
+        break;
+    case MESSAGE_TYPE_ORDER_CANCELLED:
+        messageSize = MESSAGE_SIZE_ORDER_CANCELLED;
+        break;
+    case MESSAGE_TYPE_ORDER_DELETE:
+        messageSize = MESSAGE_SIZE_ORDER_DELETE;
+        break;
+    case MESSAGE_TYPE_ORDER_REPLACE:
+        messageSize = MESSAGE_SIZE_ORDER_REPLACE;
+        break;
 
-        case MESSAGE_TYPE_TRADE_NON_CROSS:
-            messageSize = MESSAGE_SIZE_TRADE_NON_CROSS;
-            break;
-        case MESSAGE_TYPE_TRADE_CROSS:
-            messageSize = MESSAGE_SIZE_TRADE_CROSS;
-            break;
-        case MESSAGE_TYPE_TRADE_BROKEN:
-            messageSize = MESSAGE_SIZE_TRADE_BROKEN;
-            break;
+    case MESSAGE_TYPE_TRADE_NON_CROSS:
+        messageSize = MESSAGE_SIZE_TRADE_NON_CROSS;
+        break;
+    case MESSAGE_TYPE_TRADE_CROSS:
+        messageSize = MESSAGE_SIZE_TRADE_CROSS;
+        break;
+    case MESSAGE_TYPE_TRADE_BROKEN:
+        messageSize = MESSAGE_SIZE_TRADE_BROKEN;
+        break;
 
-        case MESSAGE_TYPE_NOII:
-            messageSize = MESSAGE_SIZE_NOII;
-            break;
+    case MESSAGE_TYPE_NOII:
+        messageSize = MESSAGE_SIZE_NOII;
+        break;
 
-        case MESSAGE_TYPE_RPII:
-            messageSize = MESSAGE_SIZE_RPII;
-            break;
+    case MESSAGE_TYPE_RPII:
+        messageSize = MESSAGE_SIZE_RPII;
+        break;
 
-        case MESSAGE_TYPE_DLCR_PRICE_DISCOVERY:
-            messageSize = MESSAGE_SIZE_DLCR_PRICE_DISCOVERY;
-            break;
+    case MESSAGE_TYPE_DLCR_PRICE_DISCOVERY:
+        messageSize = MESSAGE_SIZE_DLCR_PRICE_DISCOVERY;
+        break;
 
-        default:
-            messageSize = 0;
-            break;
+    default:
+        messageSize = 0;
+        break;
     }
     return messageSize;
 }

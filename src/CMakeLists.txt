@@ -17,7 +17,6 @@ FetchContent_MakeAvailable(fmt)
 include_directories(
     "."
     "./bookkeeping" 
-    # "./lib" bring back if adding fmt::fmt into the directory
     "./messages"
     "./utils"
 )

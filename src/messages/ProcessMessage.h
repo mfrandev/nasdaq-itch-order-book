@@ -7,6 +7,8 @@
 
 #include <MessageHeader.h>
 
+extern uint64_t marketClosedTimestamp;
+
 /**
  * Message Type identifiers for all of the messages from the protocol spec
  */ 

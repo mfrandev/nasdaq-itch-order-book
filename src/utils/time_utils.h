@@ -18,16 +18,15 @@ const static uint64_t NUMBER_OF_PERIODS_PER_DAY = 7;
 
 // 9:00
 static uint64_t startOfFirstPeriod = 32400000000000;
-static uint8_t currentPeriod = 0;
+extern uint8_t currentPeriod;
 
 /** 
  * Take a timestamp and get the period which it falls in 
  */
 uint8_t getCurrentPeriodFromTimestamp(uint64_t timestamp);
 
-/**
- * Return true if passed the number of reporting periods which occur during market hours
- */
-bool isMarketClosed();
+
+bool isAfterHours();
+void closeMarket();
 
 #endif // TREXQUANTTAKEHOME_UTILS_TIME_UTILS_H_

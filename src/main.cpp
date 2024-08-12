@@ -1,28 +1,38 @@
 #include <fstream>
 #include <vector>
 #include <fmt/format.h>
+#include <chrono>
+#include <string>
 
 #include <ProcessMessage.h>
 #include <MessageHeader.h>
 
-#include <iostream>
 #include <unordered_map>
 
 /**
  * Parse and calculate a VWAP for a binary NASDAQ ITCH 5.0 file
  */
-int main() {
+int main(int argc, char* argv[]) {
 
-    // TODO: CLA the filepath, default to this one
+    if(argc > 2) {
+        fmt::println("Do not specify more than 1 file. Quitting...");
+        return 1;
+    }
+    std::string filepath("../ITCHFiles/01302019.NASDAQ_ITCH50");
+    if(argc == 2) filepath = fmt::format("../ITCHFiles/{}",std::string(argv[1]));
+
+    fmt::println("Using file: {}", filepath);
+
+    auto start = std::chrono::system_clock::now();
+
     // Open File    
-    std::ifstream file("../01302019.NASDAQ_ITCH50", std::ios::binary);
+    std::ifstream file(filepath, std::ios::binary);
 
     if (!file) {
-        fmt::println("Failed to open the file");
+        fmt::println("Failed to open the file. Quitting...");
         return 1;
     }
 
-    // TODO: Make a circular buffer
     // Initialize the buffer
     const std::size_t bufferSize = 64;  // 64 is a pretty ok buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
     std::vector<char> buffer(bufferSize);
@@ -31,13 +41,10 @@ int main() {
     uint64_t counter = 0;
     while(file) {
 
-        // TODO: Test another file to see if this pattern holds
         // For some reason, there happens to be two leading bytes at the start of each line (maybe bad solution to another endienness problem ? it works though)
         file.read(buffer.data(), NUMBER_OF_BYTES_FOR_HEADER_CHUNK);
         BinaryMessageHeader* header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
-        // std::cout << header << '\n';
-        // if(header -> messageType == MESSAGE_TYPE_STOCK_TRADING_ACTION)
-            // fmt::println("{}. {} {} {} {}", ++counter, (*header) -> messageType, (*header) -> stockLocate, (*header) -> trackingNumber, (*header) -> timestamp);
+        // fmt::println("{}. {} {} {} {}", ++counter, (*header) -> messageType, (*header) -> stockLocate, (*header) -> trackingNumber, (*header) -> timestamp);
 
         // Get the message body 
         std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header -> messageType);
@@ -49,5 +56,10 @@ int main() {
     }
     // Close file
     file.close();
+
+    auto end = std::chrono::system_clock::now();
+    // Convert nanos to seconds
+    fmt::println("======== Total program execution time: {} seconds ========", static_cast<double>((end - start).count() / 1000000000));
+
     return 0;
 }
