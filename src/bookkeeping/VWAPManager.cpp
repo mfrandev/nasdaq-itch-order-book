@@ -6,7 +6,6 @@
 #include <ProcessMessage.h>
 
 extern uint8_t currentPeriod;
-extern uint64_t marketClosedTimestamp;
 
 // Singleton declaration and getter
 VWAPManager* VWAPManager::_instance = nullptr;
@@ -54,7 +53,6 @@ void VWAPManager::outputBrokenTradeAdjustedVWAP() {
 void VWAPManager::handleBrokenTrade(uint16_t stockLocate, BrokenTradeOrOrderExecution* brokenTradeOrOrderExecution) {
     // If the heuristic didn't catch it, nothing we can do
     if(!_brokenTradeCandidates.count(brokenTradeOrOrderExecution -> matchNumber)) return;
-    if(_brokenTradeCandidates[brokenTradeOrOrderExecution -> matchNumber].executionTimestamp > marketClosedTimestamp) return;
     _brokenTradeCandidates.erase(brokenTradeOrOrderExecution -> matchNumber);
 }
 

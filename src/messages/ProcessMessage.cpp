@@ -22,8 +22,6 @@
 
 extern uint8_t currentPeriod;
 
-uint64_t marketClosedTimestamp = 0;
-
 void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesToRead, BinaryMessageHeader *header)
 {
 
