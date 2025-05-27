@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     uint64_t counter = 0;
     while(file) {
 
-        // For some reason, there happens to be two leading bytes at the start of each line (maybe bad solution to another endienness problem ? it works though)
+        // For some reason, there happens to be two leading bytes at the start of each line
         file.read(buffer.data(), NUMBER_OF_BYTES_FOR_HEADER_CHUNK);
         BinaryMessageHeader* header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
         // fmt::println("{}. {} {} {} {}", ++counter, (*header) -> messageType, (*header) -> stockLocate, (*header) -> trackingNumber, (*header) -> timestamp);
