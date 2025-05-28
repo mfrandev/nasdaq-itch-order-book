@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_UTILS_ENDIAN_UTILS_H_
-#define TREXQUANTTAKEHOME_UTILS_ENDIAN_UTILS_H_
+#ifndef NASDAQ_UTILS_ENDIAN_UTILS_H_
+#define NASDAQ_UTILS_ENDIAN_UTILS_H_
 
 #include <cstdint>
 #include <stdlib.h>
@@ -10,4 +10,4 @@
  */
 uint64_t toHostEndianUpTo64(const char* data, size_t size);
 
-#endif // TREXQUANTTAKEHOME_UTILS_ENDIAN_UTILS_H_
+#endif // NASDAQ_UTILS_ENDIAN_UTILS_H_

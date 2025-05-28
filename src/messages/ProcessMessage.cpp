@@ -45,7 +45,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         // if(!isAfterHours()) return;
         AddOrder *addOrder = parseAddOrderBody(data);
         OrderBook::getInstance().addToActiveOrders(addOrder->orderReferenceNumber, header->stockLocate, addOrder->shares, addOrder->price);
-        // fmt::println("Adding: {},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
+        // fmt::println("1. Adding: {},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
     }
     break;
     case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
@@ -53,14 +53,14 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         // if(!isAfterHours()) return;
         AddOrderMPID *addOrderMPID = parseAddOrderMPIDBody(data);
         OrderBook::getInstance().addToActiveOrders(addOrderMPID->orderReferenceNumber, header->stockLocate, addOrderMPID->shares, addOrderMPID->price);
-        // fmt::println("Adding: {},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
+        // fmt::println("2. Adding: {},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
     }
     break;
     case MESSAGE_TYPE_TRADE_BROKEN:
     {
         BrokenTradeOrOrderExecution *brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
         VWAPManager::getInstance().handleBrokenTrade(header -> stockLocate, brokenTradeOrOrderExecution);
-        // fmt::println("There were {} broken trades", erroneousCounter);
+        // fmt::println("broken trade!");
     }
     break;
     case MESSAGE_TYPE_TRADE_CROSS:
@@ -68,7 +68,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         if(isAfterHours()) return;
         CrossTrade *crossTrade = parseCrossTradeBody(data);
         VWAPManager::getInstance().handleCrossTrade(header->timestamp, header->stockLocate, crossTrade);
-        // fmt::println("{},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
+        // fmt::println("3. {},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
     }
     break;
     case MESSAGE_TYPE_ORDER_CANCELLED:
@@ -76,15 +76,15 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         // if(!isAfterHours()) return;
         OrderCancel *orderCancel = parseOrderCancelBody(data);
         OrderBook::getInstance().cancelActiveOrder(orderCancel->orderReferenceNumber, orderCancel->cancelledShares);
-        // fmt::println("{},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
+        // fmt::println("4. {},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
     }
     break;
     case MESSAGE_TYPE_ORDER_DELETE:
     {
         // if(!isAfterHours()) return;
         OrderDelete *orderDelete = parseOrderDeleteBody(data);
-        // fmt::println("Deleting: {}", orderDelete -> orderReferenceNumber);
         OrderBook::getInstance().deleteActiveOrder(orderDelete->orderReferenceNumber);
+        // fmt::println("5. Deleting: {}", orderDelete -> orderReferenceNumber);
     }
     break;
     case MESSAGE_TYPE_ORDER_EXECUTED:
@@ -92,7 +92,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         if(isAfterHours()) return;
         OrderExecuted *orderExecuted = parseOrderExecutedBody(data);
         VWAPManager::getInstance().handleOrderExecuted(header->timestamp, header->stockLocate, orderExecuted);
-        // fmt::println("{},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
+        // fmt::println("6. {},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
     }
     break;
     case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
@@ -100,7 +100,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         if(isAfterHours()) return;
         OrderExecutedWithPrice *orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
         VWAPManager::getInstance().handleOrderExecutedWithPrice(header->timestamp, header->stockLocate, orderExecutedWithPrice);
-        // fmt::println("{},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
+        // fmt::println("7. {},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
     }
     break;
     case MESSAGE_TYPE_ORDER_REPLACE:
@@ -108,7 +108,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         // if(!isAfterHours()) return;
         OrderReplace *orderReplace = parseOrderReplaceBody(data);
         OrderBook::getInstance().replaceActiveOrder(orderReplace->originalOrderReferenceNumber, orderReplace->newOrderReferenceNumber, orderReplace->shares, orderReplace->price);
-        // fmt::println("{},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
+        // fmt::println("8. {},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
     }
     break;
     // Messages we need to handle
@@ -117,7 +117,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         // if(!isAfterHours()) return;
         StockTradingAction *stockTradingAction = parseStockTradingActionBody(data);
         VWAPManager::getInstance().handleStockTradingAction(header->stockLocate, stockTradingAction);
-        // fmt::println("StockLocate {}: {},{},{},{}", header->stockLocate, stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
+        // fmt::println("9. StockLocate {}: {},{},{},{}", header->stockLocate, stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
     }
     break;
     case MESSAGE_TYPE_SYSTEM_EVENT:
@@ -141,7 +141,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         if(isAfterHours()) return;
         TradeNonCross *tradeNonCross = parseTradeNonCrossBody(data);
         VWAPManager::getInstance().handleTrade(header->timestamp, header->stockLocate, tradeNonCross);
-        // fmt::println("{},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
+        // fmt::println("10. {},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
     }
     break;
 

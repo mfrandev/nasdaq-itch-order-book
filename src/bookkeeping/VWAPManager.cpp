@@ -4,6 +4,7 @@
 
 #include <OrderBook.h>
 #include <ProcessMessage.h>
+#include <time_utils.h>
 
 extern uint8_t currentPeriod;
 
@@ -155,12 +156,24 @@ bool VWAPManager::_flagOrderOrTradeAsErroneousCandidate(uint32_t price, uint32_t
 }
 
 /**
- * At the end of system hours, any non-broken trades should be accounted for
+ * At the end of system hours, any non-broken, intraday trades should be accounted for
  */
 void VWAPManager::_mergeRemainingBrokenTradeCandidatesIntoVWAPStatsPerPeriod() {
     for(auto& mergeCandidate: _brokenTradeCandidates) {
         uint8_t period = getCurrentPeriodFromTimestamp(mergeCandidate.second.executionTimestamp);
-        // assert(_periodicVWAPStatsPerIssue.count(mergeCandidate.second.stockLocate));
+        
+        assert(_periodicVWAPStatsPerIssue.count(mergeCandidate.second.stockLocate));
+        
+        // Discount after hours trades. We are only interested in intraday activity
+        if(period < 0 || period >= NUMBER_OF_PERIODS_PER_DAY) {
+        //     fmt::println("Found erroneous out-of-hours trade: Timestamp: {} is period: {} Price: {} Volume: {} Stock Locate: {}", mergeCandidate.second.executionTimestamp, 
+        //         period, 
+        //         mergeCandidate.second.executionPrice, 
+        //         mergeCandidate.second.executionVolume, 
+        //         mergeCandidate.second.stockLocate);
+            continue;
+        }
+        assert(period < NUMBER_OF_PERIODS_PER_DAY);
         VWAPFormula dataToUpdate = _periodicVWAPStatsPerIssue[mergeCandidate.second.stockLocate][period];
 
         // Perform the merge

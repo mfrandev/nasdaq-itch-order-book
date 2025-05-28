@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_
-#define TREXQUANTTAKEHOME_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_
+#ifndef NASDAQ_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_
+#define NASDAQ_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_
 
 #include <cstdint>
 
@@ -11,4 +11,4 @@ struct BrokenTradeOrOrderExecution {
 // Parse the Broken Trade or Order Execution message body
 BrokenTradeOrOrderExecution* parseBrokenTradeOrOrderExecutionBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_
+#endif // NASDAQ_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15...3.25)
 
 project(
-    TrexquantTakeHome
+    NASDAQ-Order-Book
     DESCRIPTION "VWAP from Binary ITCH 5.0 File"
     LANGUAGES CXX
 )
@@ -29,5 +29,5 @@ file(GLOB SOURCES
 )
 
 # The compiled library code is here
-add_executable(trexquant_take_home ${SOURCES})
-target_link_libraries(trexquant_take_home fmt::fmt)
+add_executable(nasdaq_order_book ${SOURCES})
+target_link_libraries(nasdaq_order_book fmt::fmt)

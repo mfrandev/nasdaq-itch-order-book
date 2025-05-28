@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_TRADE_NON_CROSS_H_
-#define TREXQUANTTAKEHOME_MESSAGES_TRADE_NON_CROSS_H_
+#ifndef NASDAQ_MESSAGES_TRADE_NON_CROSS_H_
+#define NASDAQ_MESSAGES_TRADE_NON_CROSS_H_
 
 #include <cstdint>
 #include <string>
@@ -18,4 +18,4 @@ struct TradeNonCross {
 
 TradeNonCross* parseTradeNonCrossBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_TRADE_NON_CROSS_H_
+#endif // NASDAQ_MESSAGES_TRADE_NON_CROSS_H_

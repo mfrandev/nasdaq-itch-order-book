@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
         // For some reason, there happens to be two leading bytes at the start of each line
         file.read(buffer.data(), NUMBER_OF_BYTES_FOR_HEADER_CHUNK);
         BinaryMessageHeader* header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
-        // fmt::println("{}. {} {} {} {}", ++counter, (*header) -> messageType, (*header) -> stockLocate, (*header) -> trackingNumber, (*header) -> timestamp);
+        // fmt::println("{}. {} {} {} {}", ++counter, header -> messageType, header -> stockLocate, header -> trackingNumber, header -> timestamp);
 
         // Get the message body 
         std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header -> messageType);
@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
 
         // Highest level function call for maintaining books and calculating VWAP
         ProcessMessage::parseAndProcessMessageBody(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, header);
-        buffer.clear();
     }
     // Close file
     file.close();

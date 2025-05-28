@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_ORDER_REPLACE_H_
-#define TREXQUANTTAKEHOME_MESSAGES_ORDER_REPLACE_H_
+#ifndef NASDAQ_MESSAGES_ORDER_REPLACE_H_
+#define NASDAQ_MESSAGES_ORDER_REPLACE_H_
 
 #include <cstdint>
 
@@ -14,4 +14,4 @@ struct OrderReplace {
 // Parse the order replace message body
 OrderReplace* parseOrderReplaceBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_ORDER_REPLACE_H_
+#endif // NASDAQ_MESSAGES_ORDER_REPLACE_H_

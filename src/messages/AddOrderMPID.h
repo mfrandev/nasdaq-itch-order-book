@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_MPID_H_
-#define TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_MPID_H_
+#ifndef NASDAQ_MESSAGES_ADD_ORDER_MPID_H_
+#define NASDAQ_MESSAGES_ADD_ORDER_MPID_H_
 
 #include <string>
 #include <cstdint>
@@ -20,4 +20,4 @@ struct AddOrderMPID {
 
 AddOrderMPID* parseAddOrderMPIDBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_MPID_H_
+#endif // NASDAQ_MESSAGES_ADD_ORDER_MPID_H_

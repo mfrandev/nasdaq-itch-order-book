@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_SYSTEM_EVENT_H_
-#define TREXQUANTTAKEHOME_MESSAGES_SYSTEM_EVENT_H_
+#ifndef NASDAQ_MESSAGES_SYSTEM_EVENT_H_
+#define NASDAQ_MESSAGES_SYSTEM_EVENT_H_
 
 #include <cstdint>
 #include <stdlib.h>
@@ -21,4 +21,4 @@ struct SystemEvent {
 
 SystemEvent* parseSystemEventBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_SYSTEM_EVENT_H_
+#endif // NASDAQ_MESSAGES_SYSTEM_EVENT_H_

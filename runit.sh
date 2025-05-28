@@ -1,2 +1,2 @@
 cd build
-./trexquant_take_home
+./nasdaq_order_book

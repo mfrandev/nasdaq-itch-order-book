@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_H_
-#define TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_H_
+#ifndef NASDAQ_MESSAGES_ADD_ORDER_H_
+#define NASDAQ_MESSAGES_ADD_ORDER_H_
 
 #include <string>
 #include <cstdint>
@@ -18,4 +18,4 @@ struct AddOrder {
 
 AddOrder* parseAddOrderBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_ADD_ORDER_H_
+#endif // NASDAQ_MESSAGES_ADD_ORDER_H_

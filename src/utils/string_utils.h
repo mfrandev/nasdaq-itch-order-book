@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_UTILS_STRING_UTILS_H_
-#define TREXQUANTTAKEHOME_UTILS_STRING_UTILS_H_
+#ifndef NASDAQ_UTILS_STRING_UTILS_H_
+#define NASDAQ_UTILS_STRING_UTILS_H_
 
 #include <cstdint>
 #include <string>
@@ -16,4 +16,4 @@ std::string charStarToString(const char* data, size_t size);
  */
 void stripWhitespaceFromCPPString(std::string& str);
 
-#endif // TREXQUANTTAKEHOME_UTILS_STRING_UTILS_H_
+#endif // NASDAQ_UTILS_STRING_UTILS_H_

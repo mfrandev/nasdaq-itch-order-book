@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_UTILS_TIME_UTILS_H_
-#define TREXQUANTTAKEHOME_UTILS_TIME_UTILS_H_
+#ifndef NASDAQ_UTILS_TIME_UTILS_H_
+#define NASDAQ_UTILS_TIME_UTILS_H_
 
 #include <cstdint>
 
@@ -29,4 +29,4 @@ uint8_t getCurrentPeriodFromTimestamp(uint64_t timestamp);
 bool isAfterHours();
 void closeMarket();
 
-#endif // TREXQUANTTAKEHOME_UTILS_TIME_UTILS_H_
+#endif // NASDAQ_UTILS_TIME_UTILS_H_

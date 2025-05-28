@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_STOCK_TRADING_ACTION_H_
-#define TREXQUANTTAKEHOME_MESSAGES_STOCK_TRADING_ACTION_H_
+#ifndef NASDAQ_MESSAGES_STOCK_TRADING_ACTION_H_
+#define NASDAQ_MESSAGES_STOCK_TRADING_ACTION_H_
 
 #include <string>
 #include <cstdint>
@@ -25,4 +25,4 @@ struct StockTradingAction {
 
 StockTradingAction* parseStockTradingActionBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_STOCK_TRADING_ACTION_H_
+#endif // NASDAQ_MESSAGES_STOCK_TRADING_ACTION_H_

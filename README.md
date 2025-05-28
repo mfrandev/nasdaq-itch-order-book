@@ -19,7 +19,8 @@ My project uses one third party library that is unrelated to the problem domain.
 <ol>
     <li>Dependencies: An internet connection (fmt lib comes from a remote repository), CMake (within the version range 3.15...3.25), and a CXX 17 compatible compiler.</li>
     <li>Compiling: From the project's <em><b>root directory</b></em>, I recommend running <b>./buildandrunit.sh</b>. This calls both the buildit.sh and runit.sh scripts consecutively.</li>
-    <li>Using other ITCH files: First, place an unzipped ITCH file in "ITCHFiles." Then, go into the <b>runit.sh</b> script and replace "./trexquant_take_home" with "./trexquant_take_home [Filename-In-ITCHFiles]." Do not specify more than 1 file per-execution.</li>
+    <li>Download the file "01302019.NASDAQ_ITCH50.gz" from this link: https://www.google.com/url?sa=D&q=https://emi.nasdaq.com/ITCH/Nasdaq%2520ITCH/01302019.NASDAQ_ITCH50.gz&ust=1748464380000000&usg=AOvVaw04xd8uwKynAZ2iQsUDXgha&hl=en&source=gmail. Unzip it in the "ITCHFiles" directory. 
+    <li>Using other ITCH files: First, place an unzipped ITCH file in "ITCHFiles." Then, go into the <b>runit.sh</b> script and replace "./nasdaq-order-book" with "./nasdaq-order-book [Filename-In-ITCHFiles]." Do not specify more than 1 file per-execution.</li>
     <li>By default, the program will try to read "ITCHFiles/01302019.NASDAQ_ITCH50"</li>
 </ol>
 

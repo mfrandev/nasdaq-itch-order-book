@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_ORDER_DELETE_H_
-#define TREXQUANTTAKEHOME_MESSAGES_ORDER_DELETE_H_
+#ifndef NASDAQ_MESSAGES_ORDER_DELETE_H_
+#define NASDAQ_MESSAGES_ORDER_DELETE_H_
 
 #include <cstdint>
 
@@ -11,4 +11,4 @@ struct OrderDelete {
 // Parse the order delete message body
 OrderDelete* parseOrderDeleteBody(const char* data);
 
-#endif // TREXQUANTTAKEHOME_MESSAGES_ORDER_DELETE_H_
+#endif // NASDAQ_MESSAGES_ORDER_DELETE_H_

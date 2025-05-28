@@ -1,5 +1,5 @@
-#ifndef TREXQUANTTAKEHOME_MESSAGES_PROCESS_MESSAGE_H_
-#define TREXQUANTTAKEHOME_MESSAGES_PROCESS_MESSAGE_H_
+#ifndef NASDAQ_MESSAGES_PROCESS_MESSAGE_H_
+#define NASDAQ_MESSAGES_PROCESS_MESSAGE_H_
 
 #include <stdlib.h>
 #include <cstdint>
@@ -84,4 +84,4 @@ namespace ProcessMessage {
 
     void parseAndProcessMessageBody(const char* data,  size_t bytesToRead, BinaryMessageHeader* header);
 }
-#endif //TREXQUANTTAKEHOME_MESSAGES_PROCESS_MESSAGE_H_
+#endif //NASDAQ_MESSAGES_PROCESS_MESSAGE_H_
