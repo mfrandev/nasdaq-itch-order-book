@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize the buffer
-    const std::size_t bufferSize = 64;  // 64 is a pretty ok buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
+    constexpr std::size_t bufferSize = 64;  // 64 is a pretty ok buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
     std::vector<char> buffer(bufferSize);
 
     // And here is the magic

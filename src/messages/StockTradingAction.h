@@ -5,16 +5,16 @@
 #include <cstdint>
 
 // Trade state reason constants
-const char TRADING_STATE_REASON_HALTED            = 'H';
-const char TRADING_STATE_REASON_PAUSED            = 'P';
-const char TRADING_STATE_REASON_QUOTATION         = 'Q';
-const char TRADING_STATE_REASON_TRADING_ON_NASDAQ = 'T';
+constexpr char TRADING_STATE_REASON_HALTED            = 'H';
+constexpr char TRADING_STATE_REASON_PAUSED            = 'P';
+constexpr char TRADING_STATE_REASON_QUOTATION         = 'Q';
+constexpr char TRADING_STATE_REASON_TRADING_ON_NASDAQ = 'T';
 
 // Stock trading action message body
-const size_t STOCK_SIZE         = 8;
-const size_t TRADING_STATE_SIZE = 1;
-const size_t RESERVED_SIZE      = 1;
-const size_t REASON_SIZE        = 4;
+constexpr size_t STOCK_SIZE         = 8;
+constexpr size_t TRADING_STATE_SIZE = 1;
+constexpr size_t RESERVED_SIZE      = 1;
+constexpr size_t REASON_SIZE        = 4;
 
 struct StockTradingAction {
     std::string stock;

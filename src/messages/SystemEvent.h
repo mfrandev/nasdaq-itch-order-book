@@ -5,14 +5,14 @@
 #include <stdlib.h>
 
 // System Event Codes
-const char EVENT_CODE_START_OF_MESSAGES     = 'O';
-const char EVENT_CODE_START_OF_SYSTEM_HOURS = 'S';
-const char EVENT_CODE_START_OF_MARKET_HOURS = 'Q';
-const char EVENT_CODE_END_OF_MARKET_HOURS   = 'M';
-const char EVENT_CODE_END_OF_SYSTEM_HOURS   = 'E';
-const char EVENT_CODE_END_OF_MESSAGES       = 'C';
+constexpr char EVENT_CODE_START_OF_MESSAGES     = 'O';
+constexpr char EVENT_CODE_START_OF_SYSTEM_HOURS = 'S';
+constexpr char EVENT_CODE_START_OF_MARKET_HOURS = 'Q';
+constexpr char EVENT_CODE_END_OF_MARKET_HOURS   = 'M';
+constexpr char EVENT_CODE_END_OF_SYSTEM_HOURS   = 'E';
+constexpr char EVENT_CODE_END_OF_MESSAGES       = 'C';
 
-const size_t EVENT_CODE_SIZE = 1;
+constexpr size_t EVENT_CODE_SIZE = 1;
 
 // Struct for storing the System Event message body
 struct SystemEvent {

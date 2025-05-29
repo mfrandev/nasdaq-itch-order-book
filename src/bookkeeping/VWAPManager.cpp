@@ -16,8 +16,8 @@ VWAPManager& VWAPManager::getInstance() {
     return *_instance;
 }
 
-const char IGNORE_ORDER_EXECUTED_WITH_PRICE_MESSAGE = 'N'; // Non-printable and we should ignore 
-const char STOCK_IS_TRADING                         = 'T';
+constexpr char IGNORE_ORDER_EXECUTED_WITH_PRICE_MESSAGE = 'N'; // Non-printable and we should ignore 
+constexpr char STOCK_IS_TRADING                         = 'T';
 
 /**
  * Output the broken trade adjusted periodic VWAP to a set of files

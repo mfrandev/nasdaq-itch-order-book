@@ -11,8 +11,8 @@ struct BinaryMessageHeader {
     uint64_t timestamp; 
 };
 
-const int NUMBER_OF_BYTES_FOR_HEADER_CHUNK          = 13;
-const int NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK   = 2;
+constexpr int NUMBER_OF_BYTES_FOR_HEADER_CHUNK          = 13;
+constexpr int NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK   = 2;
 
 BinaryMessageHeader* parseHeader(const char* data);
 

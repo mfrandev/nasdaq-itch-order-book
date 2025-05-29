@@ -4,8 +4,8 @@
 #include <string>
 #include <cstdint>
 
-const size_t BUY_SELL_INDICATOR_SIZE = 1;
-// const size_t STOCK_SIZE = 8; Use the value from StockTradingAction.h
+constexpr size_t BUY_SELL_INDICATOR_SIZE = 1;
+// constexpr size_t STOCK_SIZE = 8; Use the value from StockTradingAction.h
 
 // Store the Add Order message body
 struct AddOrder {

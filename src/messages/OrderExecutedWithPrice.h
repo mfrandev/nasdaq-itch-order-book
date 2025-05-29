@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <stdlib.h>
 
-const size_t PRINTABLE_SIZE = 1;
+constexpr size_t PRINTABLE_SIZE = 1;
 
 // Store all other fields for the OrderExecutedWithPrice message here
 struct OrderExecutedWithPrice {

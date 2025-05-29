@@ -17,12 +17,11 @@
 
 #include <time_utils.h>
 
-const uint32_t TOP_OF_10_PERCENT_BAND = 250000;
-const uint32_t TOP_OF_5_PERCENT_BAND  = 500000;
+constexpr uint32_t TOP_OF_10_PERCENT_BAND = 250000;
+constexpr uint32_t TOP_OF_5_PERCENT_BAND  = 500000;
 
 /**
  * This struct contains data for VWAP calculation and derives it.
- * Doesn't feel class-worthy to me for some reason.
  */
 struct VWAPFormula {
 
