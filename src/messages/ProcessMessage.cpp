@@ -107,7 +107,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         OrderReplace *orderReplace = parseOrderReplaceBody(data);
-        OrderBook::getInstance().replaceActiveOrder(orderReplace->originalOrderReferenceNumber, orderReplace->newOrderReferenceNumber, orderReplace->shares, orderReplace->price);
+        OrderBook::getInstance().replaceActiveOrder(header -> stockLocate, orderReplace->originalOrderReferenceNumber, orderReplace->newOrderReferenceNumber, orderReplace->shares, orderReplace->price);
         // fmt::println("8. {},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
     }
     break;
