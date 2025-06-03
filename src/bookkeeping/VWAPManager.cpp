@@ -30,7 +30,7 @@ void VWAPManager::outputBrokenTradeAdjustedVWAP() {
     // Perform the broken trade VWAP adjustment
     _mergeRemainingBrokenTradeCandidatesIntoVWAPStatsPerPeriod();
     for(auto& periodicVWAPstatsForOneIssue: _periodicVWAPStatsPerIssue) {
-        std::string& currentStockSymbol = _stockLocateToStockSymbol[periodicVWAPstatsForOneIssue.first];
+        std::string& currentStockSymbol = _stockLocateToStockSymbol.at(periodicVWAPstatsForOneIssue.first);
 
         // Use these two values to calculate VWAP over time
         uint64_t cumulativePVForOneIssue = 0;
@@ -39,7 +39,7 @@ void VWAPManager::outputBrokenTradeAdjustedVWAP() {
         for(int i = 0; i < NUMBER_OF_PERIODS_PER_DAY; i++) {
             VWAPFormula statsForOnePeriod = periodicVWAPstatsForOneIssue.second[i];
             cumulativePVForOneIssue += statsForOnePeriod.getPV();
-            cumulativeVolumeForOneIssue += statsForOnePeriod.volume;
+            cumulativeVolumeForOneIssue += statsForOnePeriod.getVolume();
             if(cumulativeVolumeForOneIssue == 0) continue; // VWAP undefined if no volume
             uint64_t vwapThisPeriod = cumulativePVForOneIssue / cumulativeVolumeForOneIssue;
             // This line actually commits the stock symbol and VWAP to the file
@@ -98,10 +98,7 @@ void VWAPManager::handleStockTradingAction(uint16_t stockLocate, const std::stri
     if(_periodicVWAPStatsPerIssue.count(stockLocate)) return;
 
     //Create the default vwap and locate-to-symbol mappings for this issue
-    VWAPFormula defaultFormula;
-    std::array<VWAPFormula, NUMBER_OF_PERIODS_PER_DAY> periodicData;
-    periodicData.fill(defaultFormula);
-    _periodicVWAPStatsPerIssue[stockLocate] = periodicData;
+    _periodicVWAPStatsPerIssue.emplace(stockLocate, std::array<VWAPFormula, NUMBER_OF_PERIODS_PER_DAY>());
 }
 
 /**
@@ -120,20 +117,20 @@ void VWAPManager::_handleOrderOrTradeExecuted(uint16_t stockLocate, uint32_t pri
     // Check if this order should flagged for erroneous trade
     // assert(_periodicVWAPStatsPerIssue.count(stockLocate));
     if(!_periodicVWAPStatsPerIssue.count(stockLocate)) return;    
-    VWAPFormula* data = &(_periodicVWAPStatsPerIssue[stockLocate][currentPeriod]);
-    if(data -> lastSalePrice != UINT32_MAX && _flagOrderOrTradeAsErroneousCandidate(price, data -> lastSalePrice)) {
+    VWAPFormula& data = _periodicVWAPStatsPerIssue.at(stockLocate).at(currentPeriod);
+    if(data.getLastSalePrice() != UINT32_MAX && _flagOrderOrTradeAsErroneousCandidate(price, data.getLastSalePrice())) {
         // If not erroneous, this will eventually get merged into the trade statistics 
         _brokenTradeCandidates[matchNumber] = {price, timestamp, volume, stockLocate};
     } else {
-        if(price > data -> high)
-            data -> high = price;
-        else if(price < data -> low)
-            data -> low = price;
-        data -> volume += volume;
-        data -> close = price;
-        data -> closingTimestamp = timestamp;
+        if(price > data.getHigh())
+            data.setHigh(price);
+        else if(price < data.getLow())
+            data.setLow(price);
+        data.setVolume(data.getVolume() + volume);
+        data.setClose(price);
+        data.setClosingTimestamp(timestamp);
     }
-    data -> lastSalePrice = price;
+    data.setLastSalePrice(price);
 }
 
 /**
@@ -166,9 +163,9 @@ bool VWAPManager::_flagOrderOrTradeAsErroneousCandidate(uint32_t price, uint32_t
  */
 void VWAPManager::_mergeRemainingBrokenTradeCandidatesIntoVWAPStatsPerPeriod() {
     for(auto& mergeCandidate: _brokenTradeCandidates) {
-        uint8_t period = getCurrentPeriodFromTimestamp(mergeCandidate.second.executionTimestamp);
+        uint8_t period = getCurrentPeriodFromTimestamp(mergeCandidate.second.getExecutionTimestamp());
         
-        assert(_periodicVWAPStatsPerIssue.count(mergeCandidate.second.stockLocate));
+        assert(_periodicVWAPStatsPerIssue.count(mergeCandidate.second.getStockLocate()));
         
         // Discount after hours trades. We are only interested in intraday activity
         if(period < 0 || period >= NUMBER_OF_PERIODS_PER_DAY) {
@@ -180,19 +177,19 @@ void VWAPManager::_mergeRemainingBrokenTradeCandidatesIntoVWAPStatsPerPeriod() {
             continue;
         }
         assert(period < NUMBER_OF_PERIODS_PER_DAY);
-        VWAPFormula dataToUpdate = _periodicVWAPStatsPerIssue[mergeCandidate.second.stockLocate][period];
+        VWAPFormula dataToUpdate = _periodicVWAPStatsPerIssue[mergeCandidate.second.getStockLocate()][period];
 
         // Perform the merge
-        if(mergeCandidate.second.executionPrice < dataToUpdate.low)
-            dataToUpdate.low = mergeCandidate.second.executionPrice;
-        else if(mergeCandidate.second.executionPrice > dataToUpdate.high)
-            dataToUpdate.high = mergeCandidate.second.executionPrice;
-        dataToUpdate.volume += mergeCandidate.second.executionVolume;
+        if(mergeCandidate.second.getExecutionPrice() < dataToUpdate.getLow())
+            dataToUpdate.setLow(mergeCandidate.second.getExecutionPrice());
+        else if(mergeCandidate.second.getExecutionPrice() > dataToUpdate.getHigh())
+            dataToUpdate.setHigh(mergeCandidate.second.getExecutionPrice());
+        dataToUpdate.setVolume(dataToUpdate.getVolume() + mergeCandidate.second.getExecutionVolume());
         // No need to worry about the closing stats if the merge candidate is not later in the period than the currently tracked last trade
-        if(mergeCandidate.second.executionTimestamp < dataToUpdate.closingTimestamp) 
+        if(mergeCandidate.second.getExecutionTimestamp() < dataToUpdate.getClosingTimestamp()) 
             continue;
-        dataToUpdate.closingTimestamp = mergeCandidate.second.executionTimestamp;
-        dataToUpdate.close = mergeCandidate.second.executionPrice;
+        dataToUpdate.setClosingTimestamp(mergeCandidate.second.getExecutionTimestamp());
+        dataToUpdate.setClose(mergeCandidate.second.getExecutionPrice());
     }
 
     // Free the memory from _brokenTradeCandidates after the merge is complete

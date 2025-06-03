@@ -21,38 +21,82 @@ constexpr uint32_t TOP_OF_10_PERCENT_BAND = 250000;
 constexpr uint32_t TOP_OF_5_PERCENT_BAND  = 500000;
 
 /**
- * This struct contains data for VWAP calculation and derives it.
+ * This class contains data for VWAP calculation and derives it.
  */
-struct VWAPFormula {
+class VWAPFormula {
 
-    uint32_t high;
-    uint32_t low;
-    uint32_t close;
-    uint64_t closingTimestamp;
-    uint64_t volume;
-    uint32_t lastSalePrice; // Use for evaluating possible erroneous trade
+    private:
+        uint32_t high = 0;
+        uint32_t low = UINT32_MAX;
+        uint32_t close = 0;
+        uint64_t closingTimestamp = 0;
+        uint64_t volume = 0;
+        uint32_t lastSalePrice = UINT32_MAX; // Use for evaluating possible erroneous trade
 
-    uint32_t getTypicalPrice() { return std::round((high + low + close) / 3); }
-    uint64_t getPV() { return getTypicalPrice() * volume; }
+    public:
 
-    explicit VWAPFormula():
-        high(0),
-        low(UINT32_MAX),
-        close(0),
-        closingTimestamp(0),
-        volume(0),
-        lastSalePrice(UINT32_MAX) 
-    {};
+        VWAPFormula() = default;
+        VWAPFormula(const VWAPFormula& other) = default;
+        VWAPFormula& operator=(const VWAPFormula& other) = default;
+        VWAPFormula(VWAPFormula&& other) noexcept = default;
+        VWAPFormula& operator=(VWAPFormula&& other) noexcept = default;
+        ~VWAPFormula() = default;
+
+        // Setters
+        void setHigh(uint32_t high) { this -> high = high; }
+        void setLow(uint32_t low) { this -> low = low; }
+        void setClose(uint32_t close) { this -> close = close; }
+        void setClosingTimestamp(uint64_t closingTimestamp) { this -> closingTimestamp = closingTimestamp; }
+        void setVolume(uint64_t volume) { this -> volume = volume; }
+        void setLastSalePrice(uint32_t lastSalePrice) { this -> lastSalePrice = lastSalePrice; }
+
+        // Getters
+        uint32_t getHigh() const { return this -> high; }
+        uint32_t getLow() const { return this -> low; }
+        uint32_t getClose() const { return this -> close; }
+        uint64_t getClosingTimestamp() const { return this -> closingTimestamp; }
+        uint64_t getVolume() const { return this -> volume; }
+        uint32_t getLastSalePrice() const { return this -> lastSalePrice; }
+
+        uint32_t getTypicalPrice() { return std::round((high + low + close) / 3); }
+        uint64_t getPV() { return getTypicalPrice() * volume; }
+
+
 };
 
 /**
- * This struct contains the information we need to adjust VWAP after accounting for broken trades
+ * This class contains the information we need to adjust VWAP after accounting for broken trades
  */
-struct BrokenTradeCandidate {
-    uint32_t executionPrice;
-    uint64_t executionTimestamp;
-    uint64_t executionVolume;
-    uint16_t stockLocate;
+class BrokenTradeCandidate {
+    private:
+        uint32_t executionPrice;
+        uint64_t executionTimestamp;
+        uint64_t executionVolume;
+        uint16_t stockLocate;
+
+    public:
+        BrokenTradeCandidate(uint32_t executionPrice, uint64_t executionTimestamp, uint64_t executionVolume, uint16_t stockLocate)
+            : executionPrice(executionPrice),
+              executionTimestamp(executionTimestamp),
+              executionVolume(executionVolume),
+              stockLocate(stockLocate) {}
+    
+        BrokenTradeCandidate() = default;
+        BrokenTradeCandidate(const BrokenTradeCandidate& other) = default;
+        BrokenTradeCandidate& operator=(const BrokenTradeCandidate& other) = default;
+        BrokenTradeCandidate(BrokenTradeCandidate&& other) noexcept = default;
+        BrokenTradeCandidate& operator=(BrokenTradeCandidate&& other) noexcept = default;
+        ~BrokenTradeCandidate() = default;
+
+        uint32_t getExecutionPrice() const { return this -> executionPrice; }
+        uint64_t getExecutionTimestamp() const { return this -> executionTimestamp; }
+        uint64_t getExecutionVolume() const { return this -> executionVolume; }
+        uint16_t getStockLocate() const { return this -> stockLocate; }
+
+        void setExecutionPrice(uint32_t executionPrice) { this -> executionPrice = executionPrice; }
+        void setExecutionTimestamp(uint64_t executionTimestamp) { this -> executionTimestamp = executionTimestamp; }
+        void setExecutionVolume(uint64_t executionVolume) { this -> executionVolume = executionVolume; }
+        void setStockLocate(uint16_t stockLocate) { this -> stockLocate = stockLocate; }
 };
 
 /**
