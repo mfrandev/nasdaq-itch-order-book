@@ -66,66 +66,65 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     case MESSAGE_TYPE_TRADE_CROSS:
     {
         if(isAfterHours()) return;
-        CrossTrade *crossTrade = parseCrossTradeBody(data);
-        VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getStockLocate(), crossTrade -> crossPrice, crossTrade -> shares, crossTrade -> matchNumber);
-        // fmt::println("3. {},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
+        CrossTrade crossTrade = parseCrossTradeBody(data);
+        VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getStockLocate(), crossTrade.getCrossPrice(), crossTrade.getShares(), crossTrade.getMatchNumber());
+        // fmt::println("3. {},{},{},{},{}", crossTrade.getShares(), crossTrade.getStock(), crossTrade.getCrossPrice(), crossTrade.getMatchNumber(), crossTrade.getCrossType());
     }
     break;
     case MESSAGE_TYPE_ORDER_CANCELLED:
     {
         // if(!isAfterHours()) return;
-        OrderCancel *orderCancel = parseOrderCancelBody(data);
-        OrderBook::getInstance().cancelActiveOrder(orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
-        // fmt::println("4. {},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
+        OrderCancel orderCancel = parseOrderCancelBody(data);
+        OrderBook::getInstance().cancelActiveOrder(orderCancel.getOrderReferenceNumber(), orderCancel.getCancelledShares());
+        // fmt::println("4. {},{}",orderCancel.getOrderReferenceNumber(), orderCancel.getCancelledShares());
     }
     break;
     case MESSAGE_TYPE_ORDER_DELETE:
     {
         // if(!isAfterHours()) return;
-        OrderDelete *orderDelete = parseOrderDeleteBody(data);
-        OrderBook::getInstance().deleteActiveOrder(orderDelete -> orderReferenceNumber);
-        // fmt::println("5. Deleting: {}", orderDelete -> orderReferenceNumber);
+        OrderDelete orderDelete = parseOrderDeleteBody(data);
+        OrderBook::getInstance().deleteActiveOrder(orderDelete.getOrderReferenceNumber());
+        // fmt::println("5. Deleting: {}", orderDelete.getOrderReferenceNumber());
     }
     break;
     case MESSAGE_TYPE_ORDER_EXECUTED:
     {
         if(isAfterHours()) return;
-        OrderExecuted *orderExecuted = parseOrderExecutedBody(data);
+        OrderExecuted orderExecuted = parseOrderExecutedBody(data);
         VWAPManager::getInstance().handleOrderExecuted(
             header.getTimestamp(), 
             header.getStockLocate(), 
-            orderExecuted -> orderReferenceNumber, 
-            orderExecuted -> executedShares, 
-            orderExecuted -> matchNumber
+            orderExecuted.getOrderReferenceNumber(), 
+            orderExecuted.getExecutedShares(), 
+            orderExecuted.getMatchNumber()
         );
-        // fmt::println("6. {},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
+        // fmt::println("6. {},{},{}", orderExecuted.getOrderReferenceNumber(), orderExecuted.getExecutedShares(), orderExecuted.getMatchNumber());
     }
     break;
     case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
     {
         if(isAfterHours()) return;
-        OrderExecutedWithPrice *orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
+        OrderExecutedWithPrice orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
         VWAPManager::getInstance().handleOrderExecutedWithPrice(
             header.getTimestamp(), 
             header.getStockLocate(), 
-            orderExecutedWithPrice->orderReferenceNumber,
-            orderExecutedWithPrice->executedShares,
-            orderExecutedWithPrice->matchNumber,
-            orderExecutedWithPrice->printable,
-            orderExecutedWithPrice->executionPrice
+            orderExecutedWithPrice.getOrderReferenceNumber(),
+            orderExecutedWithPrice.getExecutedShares(),
+            orderExecutedWithPrice.getMatchNumber(),
+            orderExecutedWithPrice.getPrintable(),
+            orderExecutedWithPrice.getExecutionPrice()
         );
-        // fmt::println("7. {},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
+        // fmt::println("7. {},{},{},{},{}", orderExecutedWithPrice.getOrderReferenceNumber(), orderExecutedWithPrice.getExecutedShares(), orderExecutedWithPrice.geMtatchNumber(), orderExecutedWithPrice.getPrintable(), orderExecutedWithPrice.getExecutionPrice());
     }
     break;
     case MESSAGE_TYPE_ORDER_REPLACE:
     {
         // if(!isAfterHours()) return;
-        OrderReplace *orderReplace = parseOrderReplaceBody(data);
-        OrderBook::getInstance().replaceActiveOrder(header.getStockLocate(), orderReplace->originalOrderReferenceNumber, orderReplace->newOrderReferenceNumber, orderReplace->shares, orderReplace->price);
-        // fmt::println("8. {},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
+        OrderReplace orderReplace = parseOrderReplaceBody(data);
+        OrderBook::getInstance().replaceActiveOrder(header.getStockLocate(), orderReplace.getOriginalOrderReferenceNumber(), orderReplace.getNewOrderReferenceNumber(), orderReplace.getShares(), orderReplace.getPrice());
+        // fmt::println("8. {},{},{},{}", orderReplace.getOriginalOrderReferenceNumber(), orderReplace.getNewOrderReferenceNumber(), orderReplace.getShares(), orderReplace.getPrice());
     }
     break;
-    // Messages we need to handle
     case MESSAGE_TYPE_STOCK_TRADING_ACTION:
     {
         // if(!isAfterHours()) return;

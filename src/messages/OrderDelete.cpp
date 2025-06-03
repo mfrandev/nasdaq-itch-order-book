@@ -5,9 +5,8 @@
 /**
  * Parse the OrderDelete body
  */
-OrderDelete* parseOrderDeleteBody(const char* data) {
-    static OrderDelete orderDelete;
+OrderDelete parseOrderDeleteBody(const char* data) {
     size_t offset = 0;
-    orderDelete.orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
-    return &orderDelete;
+    uint64_t orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
+    return OrderDelete(orderReferenceNumber);
 }
