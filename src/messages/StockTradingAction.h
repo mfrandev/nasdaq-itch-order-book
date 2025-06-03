@@ -27,12 +27,13 @@ class StockTradingAction {
 
         /**
          * Rule-of-5 implcitly implemented, since char is trivial and std::string is implemented to be compliant as well
+         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
          */
-        StockTradingAction(std::string stock, char tradingState, char reserved, std::string reason) :
-        stock(std::move(stock)),
+        StockTradingAction(const std::string& stock, char tradingState, char reserved, const std::string& reason) :
+        stock(stock),
         tradingState(tradingState),
         reserved(reserved),
-        reason(std::move(reason))
+        reason(reason)
         {}
 
         void setStock(std::string stock) { this -> stock = std::move(stock); }

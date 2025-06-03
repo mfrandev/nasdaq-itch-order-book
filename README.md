@@ -33,8 +33,7 @@ My project uses one third party library that is unrelated to the problem domain.
 ## Implementation Notes:
 <ol>
     <li>The VWAPManager and OrderBook classes implement all of the calculation and bookkeeping required to produce the running VWAP. VWAPManager tracks trade executions for each security over time. OrderBook tracks each order's state leading up to execution.</li>
-    <li>Processing is computationally expensive, so I intentionally try to take advantage of C++'s move semantics and copy elision features.
-    <li>I decided to make all of the binary message parsing structs static and pass them everywhere by-reference. This means the header for every message and the body for each message type will have its own "reserved" chunk of memory ("reserved" not because they are access protected like a unique_ptr, but always occupy the same address). Note: I took a memory profile on my main workstation (referenced above) and saw ~0.4% memory usage :)</li>
+    <li>Processing is computationally expensive, so I intentionally try to take advantage of C++'s move semantics and copy elision features. </li>
     <li>I performed testing/debugging by placing asserts for certain conditions throughout the"VWAPManager" and "OrderBook" class implemetnations. These asserts were left in the code as comments, because I assume this will program will get tested on other ITCH files and I don't know if they might get triggered by file-specific irregularities. </li>
     <li>The biggest challenge this project posed by far was how to properly handle Broken Trades or Executions. I eventually settled on a strategy to screen for possibly erroneous trades using a heuristic Nasdaq alluded to in their Erroneous Trade Policy Page, separate them from clearly valid trades, then merge the remaining trades into the final "broken trade adjusted" VWAP, after the close of system hours. </li>
 </ol>

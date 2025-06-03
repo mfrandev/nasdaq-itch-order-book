@@ -14,9 +14,13 @@ class CrossTrade {
         char crossType;
 
     public:
-        CrossTrade(uint64_t shares, std::string stock, uint32_t crossPrice, uint64_t matchNumber, char crossType) :
+        /**
+         * Rule of 5 compliant
+         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
+         */
+        CrossTrade(uint64_t shares, const std::string& stock, uint32_t crossPrice, uint64_t matchNumber, char crossType) :
         shares(shares),
-        stock(std::move(stock)),
+        stock(stock),
         crossPrice(crossPrice),
         matchNumber(matchNumber),
         crossType(crossType) 

@@ -21,12 +21,13 @@ class TradeNonCross {
 
         /**
          * Rule of 5 compliant
+         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases. 
          */
-        TradeNonCross(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, std::string stock, uint32_t price, uint64_t matchNumber) :
+        TradeNonCross(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, const std::string& stock, uint32_t price, uint64_t matchNumber) :
         orderReferenceNumber(orderReferenceNumber),
         buySellIndicator(buySellIndicator),
         shares(shares),
-        stock(std::move(stock)),
+        stock(stock),
         price(price),
         matchNumber(matchNumber)
         {}

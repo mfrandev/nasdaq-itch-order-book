@@ -19,13 +19,17 @@ class AddOrderMPID {
         std::string attribution;
     
     public:
-        AddOrderMPID(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, std::string stock, uint32_t price, std::string attribution) :
+        /**
+         * Rule-of-5 compliant
+         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
+         */
+        AddOrderMPID(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, const std::string& stock, uint32_t price, const std::string& attribution) :
             orderReferenceNumber(orderReferenceNumber),
             buySellIndicator(buySellIndicator),
             shares(shares),
-            stock(std::move(stock)),
+            stock(stock),
             price(price),
-            attribution(std::move(attribution))
+            attribution(attribution)
             {}
 
             // Setters

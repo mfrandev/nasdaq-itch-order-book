@@ -17,11 +17,15 @@ class AddOrder {
         uint32_t price;
     
     public:
-        AddOrder(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, std::string stock, uint32_t price) :
+        /**
+         * Rule of 5 compliant
+         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
+         */
+        AddOrder(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, const std::string& stock, uint32_t price) :
         orderReferenceNumber(orderReferenceNumber),
         buySellIndicator(buySellIndicator),
         shares(shares),
-        stock(std::move(stock)),
+        stock(stock),
         price(price)
         {}
 
