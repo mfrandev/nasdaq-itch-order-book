@@ -8,7 +8,7 @@
  */
 BinaryMessageHeader parseHeader(const char* data) {
     size_t offset = 0;
-    char messageType = toHostEndianUpTo64(&data[offset], 1);
+    char messageType = data[offset];
     offset += 1;
     uint16_t stockLocate = toHostEndianUpTo64(&data[offset], 2);
     offset += 2;

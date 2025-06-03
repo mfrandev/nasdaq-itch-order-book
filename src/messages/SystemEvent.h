@@ -14,11 +14,23 @@ constexpr char EVENT_CODE_END_OF_MESSAGES       = 'C';
 
 constexpr size_t EVENT_CODE_SIZE = 1;
 
-// Struct for storing the System Event message body
-struct SystemEvent {
-    char eventCode;
+// Class for storing the System Event message body
+class SystemEvent {
+
+    private:
+        char eventCode;
+
+    public:
+
+        /**
+         * Compiler will generate the default destuctor copy/move operator= and copy/move constructors
+         */
+        SystemEvent(char eventCode) : eventCode(eventCode) {}
+
+        void setEventCode(char eventCode) { this -> eventCode = eventCode; }
+        char getEventCode() const { return this -> eventCode; } 
 };
 
-SystemEvent* parseSystemEventBody(const char* data);
+SystemEvent parseSystemEventBody(const char* data);
 
 #endif // NASDAQ_MESSAGES_SYSTEM_EVENT_H_

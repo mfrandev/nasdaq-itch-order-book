@@ -5,9 +5,8 @@
 /**
  * Parse the system event body
  */
-SystemEvent* parseSystemEventBody(const char* data) {
-    static SystemEvent systemEvent;
+SystemEvent parseSystemEventBody(const char* data) {
     size_t offset = 0;
-    std::memcpy(&(systemEvent.eventCode), &data[offset], EVENT_CODE_SIZE);
-    return &systemEvent;
+    char eventCode = data[offset];
+    return SystemEvent(eventCode);
 }

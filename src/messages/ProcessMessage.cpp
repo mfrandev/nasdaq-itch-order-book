@@ -129,17 +129,17 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     case MESSAGE_TYPE_STOCK_TRADING_ACTION:
     {
         // if(!isAfterHours()) return;
-        StockTradingAction *stockTradingAction = parseStockTradingActionBody(data);
-        VWAPManager::getInstance().handleStockTradingAction(header.getStockLocate(), stockTradingAction -> stock, stockTradingAction -> tradingState);
+        StockTradingAction stockTradingAction = parseStockTradingActionBody(data);
+        VWAPManager::getInstance().handleStockTradingAction(header.getStockLocate(), stockTradingAction.getStock(), stockTradingAction.getTradingState());
         // fmt::println("9. StockLocate {}: {},{},{},{}", header.getStockLocate(), stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
     }
     break;
     case MESSAGE_TYPE_SYSTEM_EVENT:
     {
-        SystemEvent* systemEvent = parseSystemEventBody(data);
+        SystemEvent systemEvent = parseSystemEventBody(data);
         // fmt::println("{}",systemEvent -> eventCode);
         // Prodce the output
-        switch(systemEvent -> eventCode) {
+        switch(systemEvent.getEventCode()) {
             case EVENT_CODE_END_OF_MARKET_HOURS:
                 closeMarket();
                 break;
@@ -153,9 +153,9 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     case MESSAGE_TYPE_TRADE_NON_CROSS:
     {
         if(isAfterHours()) return;
-        TradeNonCross *tradeNonCross = parseTradeNonCrossBody(data);
-        VWAPManager::getInstance().handleTrade(header.getTimestamp(), header.getStockLocate(), tradeNonCross->price, tradeNonCross->shares, tradeNonCross->matchNumber);
-        // fmt::println("10. {},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
+        TradeNonCross tradeNonCross = parseTradeNonCrossBody(data);
+        VWAPManager::getInstance().handleTrade(header.getTimestamp(), header.getStockLocate(), tradeNonCross.getPrice(), tradeNonCross.getShares(), tradeNonCross.getMatchNumber());
+        // fmt::println("10. {},{},{},{},{},{}", tradeNonCross.getOrderReferenceNumber(), tradeNonCross.getBuySellIndicator(), tradeNonCross.getShares(), tradeNonCross.geStock(), tradeNonCross.getPrice(), tradeNonCross.getMatchNumber());
     }
     break;
 
