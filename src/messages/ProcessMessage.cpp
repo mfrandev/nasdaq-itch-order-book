@@ -44,7 +44,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         AddOrder *addOrder = parseAddOrderBody(data);
-        OrderBook::getInstance().addToActiveOrders(addOrder->orderReferenceNumber, header->stockLocate, addOrder->shares, addOrder->price);
+        OrderBook::getInstance().addToActiveOrders(addOrder -> orderReferenceNumber, header -> stockLocate, addOrder -> shares, addOrder -> price);
         // fmt::println("1. Adding: {},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
     }
     break;
@@ -59,7 +59,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     case MESSAGE_TYPE_TRADE_BROKEN:
     {
         BrokenTradeOrOrderExecution *brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
-        VWAPManager::getInstance().handleBrokenTrade(header -> stockLocate, brokenTradeOrOrderExecution);
+        VWAPManager::getInstance().handleBrokenTrade(header -> stockLocate, brokenTradeOrOrderExecution -> matchNumber);
         // fmt::println("broken trade!");
     }
     break;
@@ -67,7 +67,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         if(isAfterHours()) return;
         CrossTrade *crossTrade = parseCrossTradeBody(data);
-        VWAPManager::getInstance().handleCrossTrade(header->timestamp, header->stockLocate, crossTrade);
+        VWAPManager::getInstance().handleCrossTrade(header -> timestamp, header -> stockLocate, crossTrade -> crossPrice, crossTrade -> shares, crossTrade -> matchNumber);
         // fmt::println("3. {},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
     }
     break;
@@ -75,7 +75,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         OrderCancel *orderCancel = parseOrderCancelBody(data);
-        OrderBook::getInstance().cancelActiveOrder(orderCancel->orderReferenceNumber, orderCancel->cancelledShares);
+        OrderBook::getInstance().cancelActiveOrder(orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
         // fmt::println("4. {},{}",orderCancel -> orderReferenceNumber, orderCancel -> cancelledShares);
     }
     break;
@@ -83,7 +83,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         OrderDelete *orderDelete = parseOrderDeleteBody(data);
-        OrderBook::getInstance().deleteActiveOrder(orderDelete->orderReferenceNumber);
+        OrderBook::getInstance().deleteActiveOrder(orderDelete -> orderReferenceNumber);
         // fmt::println("5. Deleting: {}", orderDelete -> orderReferenceNumber);
     }
     break;
@@ -91,7 +91,13 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         if(isAfterHours()) return;
         OrderExecuted *orderExecuted = parseOrderExecutedBody(data);
-        VWAPManager::getInstance().handleOrderExecuted(header->timestamp, header->stockLocate, orderExecuted);
+        VWAPManager::getInstance().handleOrderExecuted(
+            header->timestamp, 
+            header->stockLocate, 
+            orderExecuted -> orderReferenceNumber, 
+            orderExecuted -> executedShares, 
+            orderExecuted -> matchNumber
+        );
         // fmt::println("6. {},{},{}", orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
     }
     break;
@@ -99,7 +105,15 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         if(isAfterHours()) return;
         OrderExecutedWithPrice *orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
-        VWAPManager::getInstance().handleOrderExecutedWithPrice(header->timestamp, header->stockLocate, orderExecutedWithPrice);
+        VWAPManager::getInstance().handleOrderExecutedWithPrice(
+            header->timestamp, 
+            header->stockLocate, 
+            orderExecutedWithPrice->orderReferenceNumber,
+            orderExecutedWithPrice->executedShares,
+            orderExecutedWithPrice->matchNumber,
+            orderExecutedWithPrice->printable,
+            orderExecutedWithPrice->executionPrice
+        );
         // fmt::println("7. {},{},{},{},{}", orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> printable, orderExecutedWithPrice -> executionPrice);
     }
     break;
@@ -116,7 +130,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         StockTradingAction *stockTradingAction = parseStockTradingActionBody(data);
-        VWAPManager::getInstance().handleStockTradingAction(header->stockLocate, stockTradingAction);
+        VWAPManager::getInstance().handleStockTradingAction(header->stockLocate, stockTradingAction -> stock, stockTradingAction -> tradingState);
         // fmt::println("9. StockLocate {}: {},{},{},{}", header->stockLocate, stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
     }
     break;
@@ -140,7 +154,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         if(isAfterHours()) return;
         TradeNonCross *tradeNonCross = parseTradeNonCrossBody(data);
-        VWAPManager::getInstance().handleTrade(header->timestamp, header->stockLocate, tradeNonCross);
+        VWAPManager::getInstance().handleTrade(header->timestamp, header->stockLocate, tradeNonCross->price, tradeNonCross->shares, tradeNonCross->matchNumber);
         // fmt::println("10. {},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
     }
     break;

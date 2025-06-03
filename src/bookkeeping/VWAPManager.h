@@ -70,12 +70,20 @@ class VWAPManager {
     // Highest level function call for dumping periodic VWAP to a file
     void outputBrokenTradeAdjustedVWAP();
 
-    void handleBrokenTrade(uint16_t stockLocate, BrokenTradeOrOrderExecution* brokenTradeOrOrderExecution);
-    void handleCrossTrade(uint64_t timestamp, uint16_t stockLocate, CrossTrade* crossTrade);
-    void handleOrderExecuted(uint64_t timestamp, uint16_t stockLocate, OrderExecuted* orderExecuted);
-    void handleOrderExecutedWithPrice(uint64_t timestamp, uint16_t stockLocate, OrderExecutedWithPrice* orderExecutedWithPrice);
-    void handleStockTradingAction(uint16_t stockLocate, StockTradingAction* stockTradingAction);
-    void handleTrade(uint64_t timestamp, uint16_t stockLocate, TradeNonCross* tradeNonCross);
+    void handleBrokenTrade(uint16_t stockLocate, uint64_t matchNumber);
+    void handleCrossTrade(uint64_t timestamp, uint16_t stockLocate, uint32_t crossPrice, uint64_t shares, uint64_t matchNumber);
+    void handleOrderExecuted(uint64_t timestamp, uint16_t stockLocate, uint64_t orderReferenceNumber, uint32_t executedShares, uint64_t matchNumber);
+    void handleOrderExecutedWithPrice(
+        uint64_t timestamp, 
+        uint16_t stockLocate, 
+        uint64_t orderReferenceNumber,
+        uint32_t executedShares,
+        uint64_t matchNumber,
+        char printable,
+        uint32_t executionPrice
+    );
+    void handleStockTradingAction(uint16_t stockLocate, const std::string& stock, const char tradingState);
+    void handleTrade(uint64_t timestamp, uint16_t stockLocate, uint32_t price, uint32_t shares, uint64_t matchNumber);
 
     private:
 
