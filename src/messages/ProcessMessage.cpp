@@ -22,29 +22,29 @@
 
 extern uint8_t currentPeriod;
 
-void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesToRead, BinaryMessageHeader *header)
+void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesToRead, const BinaryMessageHeader& header)
 {
 
     // Check if the hour has changed and handle things appropriately
-    uint8_t periodOfThisMessage = getCurrentPeriodFromTimestamp(header->timestamp);
+    uint8_t periodOfThisMessage = getCurrentPeriodFromTimestamp(header.getTimestamp());
     if (periodOfThisMessage != currentPeriod)
     {
 
         // No need to continue keeping track of reporting period if market hours are done
         if (periodOfThisMessage < NUMBER_OF_PERIODS_PER_DAY) {
-            fmt::println("Timestamp: {} Moving from period {} to period {}", header -> timestamp, currentPeriod, periodOfThisMessage);
+            fmt::println("Timestamp: {} Moving from period {} to period {}", header.getTimestamp(), currentPeriod, periodOfThisMessage);
             currentPeriod = periodOfThisMessage;
         }
     }
 
-    switch (header->messageType)
+    switch (header.getMessageType())
     {
 
     case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
     {
         // if(!isAfterHours()) return;
         AddOrder *addOrder = parseAddOrderBody(data);
-        OrderBook::getInstance().addToActiveOrders(addOrder -> orderReferenceNumber, header -> stockLocate, addOrder -> shares, addOrder -> price);
+        OrderBook::getInstance().addToActiveOrders(addOrder -> orderReferenceNumber, header.getStockLocate(), addOrder -> shares, addOrder -> price);
         // fmt::println("1. Adding: {},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
     }
     break;
@@ -52,14 +52,14 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         AddOrderMPID *addOrderMPID = parseAddOrderMPIDBody(data);
-        OrderBook::getInstance().addToActiveOrders(addOrderMPID->orderReferenceNumber, header->stockLocate, addOrderMPID->shares, addOrderMPID->price);
+        OrderBook::getInstance().addToActiveOrders(addOrderMPID->orderReferenceNumber, header.getStockLocate(), addOrderMPID->shares, addOrderMPID->price);
         // fmt::println("2. Adding: {},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
     }
     break;
     case MESSAGE_TYPE_TRADE_BROKEN:
     {
         BrokenTradeOrOrderExecution *brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
-        VWAPManager::getInstance().handleBrokenTrade(header -> stockLocate, brokenTradeOrOrderExecution -> matchNumber);
+        VWAPManager::getInstance().handleBrokenTrade(header.getStockLocate(), brokenTradeOrOrderExecution -> matchNumber);
         // fmt::println("broken trade!");
     }
     break;
@@ -67,7 +67,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         if(isAfterHours()) return;
         CrossTrade *crossTrade = parseCrossTradeBody(data);
-        VWAPManager::getInstance().handleCrossTrade(header -> timestamp, header -> stockLocate, crossTrade -> crossPrice, crossTrade -> shares, crossTrade -> matchNumber);
+        VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getStockLocate(), crossTrade -> crossPrice, crossTrade -> shares, crossTrade -> matchNumber);
         // fmt::println("3. {},{},{},{},{}", crossTrade -> shares, crossTrade -> stock, crossTrade -> crossPrice, crossTrade -> matchNumber, crossTrade -> crossType);
     }
     break;
@@ -92,8 +92,8 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         if(isAfterHours()) return;
         OrderExecuted *orderExecuted = parseOrderExecutedBody(data);
         VWAPManager::getInstance().handleOrderExecuted(
-            header->timestamp, 
-            header->stockLocate, 
+            header.getTimestamp(), 
+            header.getStockLocate(), 
             orderExecuted -> orderReferenceNumber, 
             orderExecuted -> executedShares, 
             orderExecuted -> matchNumber
@@ -106,8 +106,8 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
         if(isAfterHours()) return;
         OrderExecutedWithPrice *orderExecutedWithPrice = parseOrderExecutedWithPriceBody(data);
         VWAPManager::getInstance().handleOrderExecutedWithPrice(
-            header->timestamp, 
-            header->stockLocate, 
+            header.getTimestamp(), 
+            header.getStockLocate(), 
             orderExecutedWithPrice->orderReferenceNumber,
             orderExecutedWithPrice->executedShares,
             orderExecutedWithPrice->matchNumber,
@@ -121,7 +121,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         OrderReplace *orderReplace = parseOrderReplaceBody(data);
-        OrderBook::getInstance().replaceActiveOrder(header -> stockLocate, orderReplace->originalOrderReferenceNumber, orderReplace->newOrderReferenceNumber, orderReplace->shares, orderReplace->price);
+        OrderBook::getInstance().replaceActiveOrder(header.getStockLocate(), orderReplace->originalOrderReferenceNumber, orderReplace->newOrderReferenceNumber, orderReplace->shares, orderReplace->price);
         // fmt::println("8. {},{},{},{}", orderReplace -> originalOrderReferenceNumber, orderReplace -> newOrderReferenceNumber, orderReplace -> shares, orderReplace -> price);
     }
     break;
@@ -130,8 +130,8 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         // if(!isAfterHours()) return;
         StockTradingAction *stockTradingAction = parseStockTradingActionBody(data);
-        VWAPManager::getInstance().handleStockTradingAction(header->stockLocate, stockTradingAction -> stock, stockTradingAction -> tradingState);
-        // fmt::println("9. StockLocate {}: {},{},{},{}", header->stockLocate, stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
+        VWAPManager::getInstance().handleStockTradingAction(header.getStockLocate(), stockTradingAction -> stock, stockTradingAction -> tradingState);
+        // fmt::println("9. StockLocate {}: {},{},{},{}", header.getStockLocate(), stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
     }
     break;
     case MESSAGE_TYPE_SYSTEM_EVENT:
@@ -154,7 +154,7 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     {
         if(isAfterHours()) return;
         TradeNonCross *tradeNonCross = parseTradeNonCrossBody(data);
-        VWAPManager::getInstance().handleTrade(header->timestamp, header->stockLocate, tradeNonCross->price, tradeNonCross->shares, tradeNonCross->matchNumber);
+        VWAPManager::getInstance().handleTrade(header.getTimestamp(), header.getStockLocate(), tradeNonCross->price, tradeNonCross->shares, tradeNonCross->matchNumber);
         // fmt::println("10. {},{},{},{},{},{}", tradeNonCross -> orderReferenceNumber, tradeNonCross -> buySellIndicator, tradeNonCross -> shares, tradeNonCross -> stock, tradeNonCross -> price, tradeNonCross -> matchNumber);
     }
     break;
