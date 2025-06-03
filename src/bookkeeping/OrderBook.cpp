@@ -25,46 +25,39 @@ OrderBook& OrderBook::getInstance() {
  * This should never be called more than once for a give orderReferenceNumber
  */
 void OrderBook::addToActiveOrders(uint64_t orderReferenceNumber, uint16_t stockLocate, uint32_t numShares, uint32_t price) {
-    // assert(!_activeOrdersBook.count(orderReferenceNumber));
-    ActiveOrderData* data = (ActiveOrderData*)malloc(sizeof(ActiveOrderData));
-    data -> stockLocate = stockLocate;
-    data -> numShares = numShares;
-    data -> price = price;
-    _activeOrdersBook[orderReferenceNumber] = data;
-    // assert(_activeOrdersBook.count(orderReferenceNumber));
+    assert(!_activeOrdersBook.count(orderReferenceNumber));
+    _activeOrdersBook.emplace(orderReferenceNumber, ActiveOrderData(stockLocate, numShares, price));
+    assert(_activeOrdersBook.count(orderReferenceNumber));
 }
 
 /**
  * This executes an order in full or in part. Orders in part have unique match numbers
  */
 uint32_t OrderBook::executeActiveOrder(uint64_t orderReferenceNumber, uint32_t numExecutedShares, uint64_t matchNumber) {
-    // assert(_activeOrdersBook.count(orderReferenceNumber));
-    ActiveOrderData* data = _activeOrdersBook[orderReferenceNumber];
-    uint32_t numOutstandingSharesOnOrder = data -> numShares - numExecutedShares;
-    uint32_t price = data -> price;
+    assert(_activeOrdersBook.count(orderReferenceNumber));
+    ActiveOrderData& data = _activeOrdersBook.at(orderReferenceNumber);
+    uint32_t numOutstandingSharesOnOrder = data.getNumShares() - numExecutedShares;
 
     if(numOutstandingSharesOnOrder == 0) {
-        _activeOrdersBook.erase(orderReferenceNumber);
-        free(data);
+        deleteActiveOrder(orderReferenceNumber);
     } else {
-        data -> numShares -= numExecutedShares;
+        data.setNumShares(data.getNumShares() - numExecutedShares);
     }
-    return price;
+    return data.getPrice();
 }
 
 /**
  * Only difference between this and the function above is execution price
  */
 void OrderBook::executeActiveOrderWithPrice(uint64_t orderReferenceNumber, uint32_t numExecutedShares, uint64_t matchNumber, uint32_t price) {
-    // assert(_activeOrdersBook.count(orderReferenceNumber));
-    ActiveOrderData* data = _activeOrdersBook[orderReferenceNumber];
-    uint32_t numOutstandingSharesOnOrder = data -> numShares - numExecutedShares;
+    assert(_activeOrdersBook.count(orderReferenceNumber));
+    ActiveOrderData& data = _activeOrdersBook.at(orderReferenceNumber);
+    uint32_t numOutstandingSharesOnOrder = data.getNumShares() - numExecutedShares;
 
     if(numOutstandingSharesOnOrder == 0) {
-        _activeOrdersBook.erase(orderReferenceNumber);
-        free(data);
+        deleteActiveOrder(orderReferenceNumber);
     } else 
-        data -> numShares -= numExecutedShares;
+        data.setNumShares(data.getNumShares() - numExecutedShares);
 }
 
 /**
@@ -73,30 +66,26 @@ void OrderBook::executeActiveOrderWithPrice(uint64_t orderReferenceNumber, uint3
  * Assuming the number of shares on the order is greater than than number of shares being cancelled
  */
 void OrderBook::cancelActiveOrder(uint64_t orderReferenceNumber, uint32_t numCancelledShares) {
-    // assert(_activeOrdersBook.count(orderReferenceNumber));
-    ActiveOrderData* data = _activeOrdersBook[orderReferenceNumber];
-    // assert(data -> numShares > numCancelledShares);
-    data -> numShares -= numCancelledShares;
+    assert(_activeOrdersBook.count(orderReferenceNumber));
+    ActiveOrderData& data = _activeOrdersBook.at(orderReferenceNumber);
+    // fmt::print("Cancelling {}/{} shares from order with reference number {}\n", numCancelledShares, data.getNumShares(), orderReferenceNumber);
+    assert(data.getNumShares() > numCancelledShares);
+    data.setNumShares(data.getNumShares() - numCancelledShares);
 }
 
 /**
  * Remove an active order from the book
  */
 void OrderBook::deleteActiveOrder(uint64_t orderReferenceNumber) {
-    // assert(_activeOrdersBook.count(orderReferenceNumber));
-    ActiveOrderData* data = _activeOrdersBook[orderReferenceNumber];
+    assert(_activeOrdersBook.count(orderReferenceNumber));
     _activeOrdersBook.erase(orderReferenceNumber);
-    free(data);
 }
 
 /**
  * Retrieve the listing with the original order reference number, update the struct, and put it back in the book with the new reference number
  */
-void OrderBook::replaceActiveOrder(uint64_t originalOrderReferenceNumber, uint64_t newOrderReferenceNumber, uint32_t newNumShares, uint32_t newPrice) {
-    // assert(_activeOrdersBook.count(originalOrderReferenceNumber));
-    ActiveOrderData* data = _activeOrdersBook[originalOrderReferenceNumber];
-    data -> numShares = newNumShares;
-    data -> price = newPrice;
-    _activeOrdersBook.erase(originalOrderReferenceNumber);
-    _activeOrdersBook[newOrderReferenceNumber] = data;
+void OrderBook::replaceActiveOrder(uint16_t stockLocate, uint64_t originalOrderReferenceNumber, uint64_t newOrderReferenceNumber, uint32_t newNumShares, uint32_t newPrice) {
+    assert(_activeOrdersBook.count(originalOrderReferenceNumber));
+    deleteActiveOrder(originalOrderReferenceNumber);
+    addToActiveOrders(newOrderReferenceNumber, stockLocate, newNumShares, newPrice);
 }

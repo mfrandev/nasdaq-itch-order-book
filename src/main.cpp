@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize the buffer
-    const std::size_t bufferSize = 64;  // 64 is a pretty ok buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
+    constexpr std::size_t bufferSize = 64;  // 64 is a pretty ok buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
     std::vector<char> buffer(bufferSize);
 
     // And here is the magic
@@ -43,11 +43,11 @@ int main(int argc, char* argv[]) {
 
         // For some reason, there happens to be two leading bytes at the start of each line
         file.read(buffer.data(), NUMBER_OF_BYTES_FOR_HEADER_CHUNK);
-        BinaryMessageHeader* header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
-        // fmt::println("{}. {} {} {} {}", ++counter, header -> messageType, header -> stockLocate, header -> trackingNumber, header -> timestamp);
+        BinaryMessageHeader header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
+        // fmt::println("{}. {} {} /*{} */{}", ++counter, header.getMessageType(), header.getStockLocate(), /*header.getTrackingNumber(),*/ header.getTimestamp());
 
         // Get the message body 
-        std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header -> messageType);
+        std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header.getMessageType());
         file.read(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody);
 
         // Highest level function call for maintaining books and calculating VWAP

@@ -3,13 +3,26 @@
 
 #include <cstdint>
 
-// Struct to store the Order Cancel message body
-struct OrderCancel {
-    uint64_t orderReferenceNumber;
-    uint32_t cancelledShares;
+// Class to store the Order Cancel message body
+class OrderCancel {
+    private: 
+        uint64_t orderReferenceNumber;
+        uint32_t cancelledShares;
+
+    public: 
+        OrderCancel(uint64_t orderReferenceNumber, uint32_t cancelledShares) :
+        orderReferenceNumber(orderReferenceNumber),
+        cancelledShares(cancelledShares)
+        {}
+
+        void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
+        void setCancelledShares(uint32_t cancelledShares) { this -> cancelledShares = cancelledShares; }
+
+        uint64_t getOrderReferenceNumber() const { return this -> orderReferenceNumber; }
+        uint32_t getCancelledShares() const { return this -> cancelledShares; }
 };
 
 // Parse the order cancel message body
-OrderCancel* parseOrderCancelBody(const char* data);
+OrderCancel parseOrderCancelBody(const char* data);
 
 #endif // NASDAQ_MESSAGES_ORDER_CANCEL_H_

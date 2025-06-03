@@ -16,8 +16,8 @@ VWAPManager& VWAPManager::getInstance() {
     return *_instance;
 }
 
-const char IGNORE_ORDER_EXECUTED_WITH_PRICE_MESSAGE = 'N'; // Non-printable and we should ignore 
-const char STOCK_IS_TRADING                         = 'T';
+constexpr char IGNORE_ORDER_EXECUTED_WITH_PRICE_MESSAGE = 'N'; // Non-printable and we should ignore 
+constexpr char STOCK_IS_TRADING                         = 'T';
 
 /**
  * Output the broken trade adjusted periodic VWAP to a set of files
@@ -51,44 +51,50 @@ void VWAPManager::outputBrokenTradeAdjustedVWAP() {
 /**
  * Remove the broken trade from the _brokenTradeCandidate mapping
  */
-void VWAPManager::handleBrokenTrade(uint16_t stockLocate, BrokenTradeOrOrderExecution* brokenTradeOrOrderExecution) {
+void VWAPManager::handleBrokenTrade(uint16_t stockLocate, uint64_t matchNumber) {
     // If the heuristic didn't catch it, nothing we can do
-    if(!_brokenTradeCandidates.count(brokenTradeOrOrderExecution -> matchNumber)) return;
-    _brokenTradeCandidates.erase(brokenTradeOrOrderExecution -> matchNumber);
+    if(!_brokenTradeCandidates.count(matchNumber)) return;
+    _brokenTradeCandidates.erase(matchNumber);
 }
 
 /**
  * Handle cross trade message
  */
-void VWAPManager::handleCrossTrade(uint64_t timestamp, uint16_t stockLocate, CrossTrade* crossTrade) {
-    if(crossTrade -> shares == 0) return;
-    _handleOrderOrTradeExecuted(stockLocate, crossTrade -> crossPrice, crossTrade -> shares, timestamp, crossTrade -> matchNumber);
+void VWAPManager::handleCrossTrade(uint64_t timestamp, uint16_t stockLocate, uint32_t crossPrice, uint64_t shares, uint64_t matchNumber) {
+    if(shares == 0) return;
+    _handleOrderOrTradeExecuted(stockLocate, crossPrice, shares, timestamp, matchNumber);
 }
 
 /**
  * Handle order execute message
  */
-void VWAPManager::handleOrderExecuted(uint64_t timestamp, uint16_t stockLocate, OrderExecuted* orderExecuted) {
-    uint32_t price = OrderBook::getInstance().executeActiveOrder(orderExecuted -> orderReferenceNumber, orderExecuted -> executedShares, orderExecuted -> matchNumber);
-    _handleOrderOrTradeExecuted(stockLocate, price, orderExecuted -> executedShares, timestamp, orderExecuted -> matchNumber);
+void VWAPManager::handleOrderExecuted(uint64_t timestamp, uint16_t stockLocate, uint64_t orderReferenceNumber, uint32_t executedShares, uint64_t matchNumber) {
+    uint32_t price = OrderBook::getInstance().executeActiveOrder(orderReferenceNumber, executedShares, matchNumber);
+    _handleOrderOrTradeExecuted(stockLocate, price, executedShares, timestamp, matchNumber);
 }
 
 /**
  * Hande order executed with price message
  */
-void VWAPManager::handleOrderExecutedWithPrice(uint64_t timestamp, uint16_t stockLocate, OrderExecutedWithPrice* orderExecutedWithPrice) {
-    if(orderExecutedWithPrice -> printable == IGNORE_ORDER_EXECUTED_WITH_PRICE_MESSAGE) return;
-    OrderBook::getInstance().executeActiveOrderWithPrice(orderExecutedWithPrice -> orderReferenceNumber, orderExecutedWithPrice -> executedShares, orderExecutedWithPrice -> matchNumber, orderExecutedWithPrice -> executionPrice);
-    _handleOrderOrTradeExecuted(stockLocate, orderExecutedWithPrice -> executionPrice, orderExecutedWithPrice -> executedShares, timestamp, orderExecutedWithPrice -> matchNumber);
+void VWAPManager::handleOrderExecutedWithPrice(uint64_t timestamp, uint16_t stockLocate, 
+    uint64_t orderReferenceNumber,
+    uint32_t executedShares,
+    uint64_t matchNumber,
+    char printable,
+    uint32_t executionPrice
+) {
+    if(printable == IGNORE_ORDER_EXECUTED_WITH_PRICE_MESSAGE) return;
+    OrderBook::getInstance().executeActiveOrderWithPrice(orderReferenceNumber, executedShares, matchNumber, executionPrice);
+    _handleOrderOrTradeExecuted(stockLocate, executionPrice, executedShares, timestamp, matchNumber);
 }
 
 /**
  * 
  */
-void VWAPManager::handleStockTradingAction(uint16_t stockLocate, StockTradingAction* stockTradingAction) {
+void VWAPManager::handleStockTradingAction(uint16_t stockLocate, const std::string& stock, const char tradingState) {
     if(!_stockLocateToStockSymbol.count(stockLocate))
-        _stockLocateToStockSymbol[stockLocate] = stockTradingAction -> stock;
-    if(stockTradingAction -> tradingState != STOCK_IS_TRADING) return;
+        _stockLocateToStockSymbol[stockLocate] = stock;
+    if(tradingState != STOCK_IS_TRADING) return;
     if(_periodicVWAPStatsPerIssue.count(stockLocate)) return;
 
     //Create the default vwap and locate-to-symbol mappings for this issue
@@ -101,8 +107,8 @@ void VWAPManager::handleStockTradingAction(uint16_t stockLocate, StockTradingAct
 /**
  * Handle a normal trade message
  */
-void VWAPManager::handleTrade(uint64_t timestamp, uint16_t stockLocate, TradeNonCross* tradeNonCross) {
-    _handleOrderOrTradeExecuted(stockLocate, tradeNonCross -> price, tradeNonCross -> shares, timestamp, tradeNonCross -> matchNumber);
+void VWAPManager::handleTrade(uint64_t timestamp, uint16_t stockLocate, uint32_t price, uint32_t shares, uint64_t matchNumber) {
+    _handleOrderOrTradeExecuted(stockLocate, price, shares, timestamp, matchNumber);
 }
 
 // ======================== Private Functions ========================

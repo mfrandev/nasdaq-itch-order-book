@@ -26,16 +26,15 @@ My project uses one third party library that is unrelated to the problem domain.
 
 ## Hardware I've Tested On:
 <ol>
-    <li>(Main Workstation) Dell XPS 8950<br>Fedora Linux 40<br>12th Gen Intel Core i7-12700 (X86_64) <br>Compiler: GNU 14.2.1<br>Total execution time: 127 seconds</li><br>
-    <li>(Other Laptop) 2017 13-Inch MacbookAir<br> MacOS Monterrey<br>1.8 GHz Intel Core i5 dual processor<br>Compiler: AppleClang 13.0.0.13000027<br>Total execution time: 600s</li>
+    <li>(Main Workstation) Dell XPS 8950<br>Fedora Linux 40<br>12th Gen Intel Core i7-12700 (X86_64) <br>Compiler: GNU 14.2.1<br>Total execution time: ~146 seconds</li><br>
+    <li>(Other Laptop) 2017 13-Inch MacbookAir<br> MacOS Monterrey<br>1.8 GHz Intel Core i5 dual processor<br>Compiler: AppleClang 13.0.0.13000027<br>Total execution time: ~526 seconds</li>
 </ol>
 
 ## Implementation Notes:
 <ol>
     <li>The VWAPManager and OrderBook classes implement all of the calculation and bookkeeping required to produce the running VWAP. VWAPManager tracks trade executions for each security over time. OrderBook tracks each order's state leading up to execution.</li>
-    <li>Processing is computationally expensive, so I intentionally try to avoid as much overhead as possible and not get in the way of the stdlib.
+    <li>Processing is computationally expensive, so I intentionally try to take advantage of C++'s move semantics and copy elision features.
     <li>I decided to make all of the binary message parsing structs static and pass them everywhere by-reference. This means the header for every message and the body for each message type will have its own "reserved" chunk of memory ("reserved" not because they are access protected like a unique_ptr, but always occupy the same address). Note: I took a memory profile on my main workstation (referenced above) and saw ~0.4% memory usage :)</li>
-    <li>I also decided to manage all of the OrderBook memory manually. I wanted to remove the overhead of shared_ptr for significantly lower latency. If this were a multi-threaded program, perhaps it would smart to use thread-local message structs. </li>
     <li>I performed testing/debugging by placing asserts for certain conditions throughout the"VWAPManager" and "OrderBook" class implemetnations. These asserts were left in the code as comments, because I assume this will program will get tested on other ITCH files and I don't know if they might get triggered by file-specific irregularities. </li>
     <li>The biggest challenge this project posed by far was how to properly handle Broken Trades or Executions. I eventually settled on a strategy to screen for possibly erroneous trades using a heuristic Nasdaq alluded to in their Erroneous Trade Policy Page, separate them from clearly valid trades, then merge the remaining trades into the final "broken trade adjusted" VWAP, after the close of system hours. </li>
 </ol>

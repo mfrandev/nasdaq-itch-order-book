@@ -7,27 +7,21 @@
 /**
  * Parse the stock trading action body contents from the buffer
  */
-StockTradingAction* parseStockTradingActionBody(const char* data) {
-    static StockTradingAction stockTradingAction;
+StockTradingAction parseStockTradingActionBody(const char* data) {
     size_t offset = 0;
 
-    // Store bytes for stock in a temp variable, copy over to a cpp string after
-    char stock[STOCK_SIZE];
-    std::memcpy(&stock[0], &data[offset], STOCK_SIZE);
-    stockTradingAction.stock = charStarToString(stock, STOCK_SIZE);
-    stripWhitespaceFromCPPString(stockTradingAction.stock);
+    std::string stock = std::string(&data[offset], STOCK_SIZE);
+    stripWhitespaceFromCPPString(stock);
     offset += STOCK_SIZE;
 
-    std::memcpy(&(stockTradingAction.tradingState), &data[offset], TRADING_STATE_SIZE);
+    char tradingState = data[offset];
     offset += TRADING_STATE_SIZE;
 
-    std::memcpy(&(stockTradingAction.reserved), &data[offset], RESERVED_SIZE);
+    char reserved = data[offset];
     offset += RESERVED_SIZE;
 
-    char reason[REASON_SIZE];
-    std::memcpy(&reason[0], &data[offset], REASON_SIZE);
-    stockTradingAction.reason = charStarToString(reason, REASON_SIZE);
-    stripWhitespaceFromCPPString(stockTradingAction.reason);
+    std::string reason = std::string(&data[offset], REASON_SIZE);
+    stripWhitespaceFromCPPString(reason);
 
-    return &stockTradingAction;
+    return StockTradingAction(stock, tradingState, reserved, reason);
 }

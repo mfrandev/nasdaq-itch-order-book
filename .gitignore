@@ -4,6 +4,7 @@
 *.NASDAQ_ITCH50
 
 **/.vscode/
+**/.DS_Store
 **/*Output
 !LiveOutput/
 !SampleOutput/

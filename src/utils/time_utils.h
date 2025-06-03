@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-const static uint64_t NANOSECONDS_PER_HOUR      = 3600000000000;
+constexpr static uint64_t NANOSECONDS_PER_HOUR      = 3600000000000;
 
 /** 
  * 1. 9:30 - 10:00
@@ -14,10 +14,10 @@ const static uint64_t NANOSECONDS_PER_HOUR      = 3600000000000;
  * 6. 14:00 - 15:00
  * 7. 15:00 - 16:00
  */
-const static uint64_t NUMBER_OF_PERIODS_PER_DAY = 7;
+constexpr static uint64_t NUMBER_OF_PERIODS_PER_DAY = 7;
 
 // 9:00
-static uint64_t startOfFirstPeriod = 32400000000000;
+constexpr uint64_t startOfFirstPeriod = 32400000000000;
 extern uint8_t currentPeriod;
 
 /** 
