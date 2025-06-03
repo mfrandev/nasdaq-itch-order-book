@@ -43,23 +43,23 @@ void ProcessMessage::parseAndProcessMessageBody(const char *data, size_t bytesTo
     case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
     {
         // if(!isAfterHours()) return;
-        AddOrder *addOrder = parseAddOrderBody(data);
-        OrderBook::getInstance().addToActiveOrders(addOrder -> orderReferenceNumber, header.getStockLocate(), addOrder -> shares, addOrder -> price);
-        // fmt::println("1. Adding: {},{},{},{},{}", addOrder -> orderReferenceNumber, addOrder -> buySellIndicator, addOrder -> shares, addOrder -> stock, addOrder -> price);
+        AddOrder addOrder = parseAddOrderBody(data);
+        OrderBook::getInstance().addToActiveOrders(addOrder.getOrderReferenceNumber(), header.getStockLocate(), addOrder.getShares(), addOrder.getPrice());
+        // fmt::println("1. Adding: {},{},{},{},{}", addOrder.getOrderReferenceNumber(), addOrder.getBuySellIndicator(), addOrder.getShares(), addOrder.getStock(), addOrder.getPrice());
     }
     break;
     case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
     {
         // if(!isAfterHours()) return;
-        AddOrderMPID *addOrderMPID = parseAddOrderMPIDBody(data);
-        OrderBook::getInstance().addToActiveOrders(addOrderMPID->orderReferenceNumber, header.getStockLocate(), addOrderMPID->shares, addOrderMPID->price);
-        // fmt::println("2. Adding: {},{},{},{},{},{}", addOrderMPID -> orderReferenceNumber, addOrderMPID -> buySellIndicator, addOrderMPID -> shares, addOrderMPID -> stock, addOrderMPID -> price, addOrderMPID -> attribution);
+        AddOrderMPID addOrderMPID = parseAddOrderMPIDBody(data);
+        OrderBook::getInstance().addToActiveOrders(addOrderMPID.getOrderReferenceNumber(), header.getStockLocate(), addOrderMPID.getShares(), addOrderMPID.getPrice());
+        // fmt::println("2. Adding: {},{},{},{},{},{}", addOrderMPID.getOrderReferenceNumber(), addOrderMPID.getBuySellIndicator(), addOrderMPID.getShares(), addOrderMPID.getStock(), addOrderMPID.getPrice(), addOrderMPID.getAttribution());
     }
     break;
     case MESSAGE_TYPE_TRADE_BROKEN:
     {
-        BrokenTradeOrOrderExecution *brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
-        VWAPManager::getInstance().handleBrokenTrade(header.getStockLocate(), brokenTradeOrOrderExecution -> matchNumber);
+        BrokenTradeOrOrderExecution brokenTradeOrOrderExecution = parseBrokenTradeOrOrderExecutionBody(data);
+        VWAPManager::getInstance().handleBrokenTrade(header.getStockLocate(), brokenTradeOrOrderExecution.getMatchNumber());
         // fmt::println("broken trade!");
     }
     break;

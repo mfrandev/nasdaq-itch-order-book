@@ -10,25 +10,20 @@
 /** 
  * Parse the AddOrderMPID message body
  */
-AddOrderMPID* parseAddOrderMPIDBody(const char* data) {
-    static AddOrderMPID addOrderMPID;
+AddOrderMPID parseAddOrderMPIDBody(const char* data) {
     size_t offset = 0;
-    addOrderMPID.orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
+    uint64_t orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
-    std::memcpy(&(addOrderMPID.buySellIndicator), &data[offset], BUY_SELL_INDICATOR_SIZE);
-    offset += BUY_SELL_INDICATOR_SIZE;
-    addOrderMPID.shares = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
+    char buySellIndicator = data[offset];
+    offset += 1;
+    uint32_t shares = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
     offset += 4;
-    char stock[STOCK_SIZE];
-    std::memcpy(&stock[0], &data[offset], STOCK_SIZE);
-    addOrderMPID.stock = charStarToString(stock, STOCK_SIZE);
-    stripWhitespaceFromCPPString(addOrderMPID.stock);
+    std::string stock = std::string(&data[offset], STOCK_SIZE);
+    stripWhitespaceFromCPPString(stock);
     offset += STOCK_SIZE;
-    addOrderMPID.price = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
+    uint32_t price = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
     offset += 4;
-    char attribution[ATTRIBUTION_SIZE];
-    std::memcpy(&attribution[0], &data[offset], ATTRIBUTION_SIZE);
-    addOrderMPID.attribution = charStarToString(attribution, ATTRIBUTION_SIZE);
-    stripWhitespaceFromCPPString(addOrderMPID.attribution);
-    return &addOrderMPID;
+    std::string attribution = std::string(&data[offset], ATTRIBUTION_SIZE);
+    stripWhitespaceFromCPPString(attribution);
+    return AddOrderMPID(orderReferenceNumber, buySellIndicator, shares, stock, price, attribution);
 }
