@@ -19,7 +19,7 @@ class OrderCancel : public Message {
         cancelledShares(cancelledShares)
         {}
 
-        void processMessage() const override { OrderBook::getInstance().cancelActiveOrder(orderReferenceNumber, cancelledShares); } 
+        bool processMessage() const override { OrderBook::getInstance().cancelActiveOrder(orderReferenceNumber, cancelledShares); return true; } 
 
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
         void setCancelledShares(uint32_t cancelledShares) { this -> cancelledShares = cancelledShares; }

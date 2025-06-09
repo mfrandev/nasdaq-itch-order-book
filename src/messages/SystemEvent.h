@@ -32,7 +32,7 @@ class SystemEvent : public Message {
         eventCode(eventCode) 
         {}
 
-        void processMessage() const override; 
+        bool processMessage() const override; 
 
         void setEventCode(char eventCode) { this -> eventCode = eventCode; }
         char getEventCode() const { return this -> eventCode; } 

@@ -4,13 +4,16 @@
 #include <VWAPManager.h>
 
 extern bool workFinished;
+extern uint64_t marketCloseTimestamp;
 
-void SystemEvent::processMessage() const {
+bool SystemEvent::processMessage() const {
     switch(eventCode) {
         case EVENT_CODE_END_OF_MARKET_HOURS:
-            closeMarket();
+            closeMarket(header.getTimestamp() + 1);
+            fmt::println("Market closed at {}", header.getTimestamp() + 1);
             break;
     }
+    return true;
 }
 
 /**

@@ -36,7 +36,7 @@ class AddOrderMPID : public Message {
             attribution(std::move(attribution))
             {}
 
-            void processMessage() const override { OrderBook::getInstance().addToActiveOrders(orderReferenceNumber, header.getStockLocate(), shares, price); }
+            bool processMessage() const override { OrderBook::getInstance().addToActiveOrders(orderReferenceNumber, header.getStockLocate(), shares, price); return true; }
 
 
             // Setters

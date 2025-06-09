@@ -20,6 +20,7 @@ constexpr static uint64_t NUMBER_OF_PERIODS_PER_DAY = 7;
 constexpr uint64_t startOfFirstPeriod = 32400000000000;
 extern uint8_t currentPeriod;
 extern bool workFinished;
+extern uint64_t marketCloseTimestamp;
 
 /** 
  * Take a timestamp and get the period which it falls in 
@@ -27,8 +28,8 @@ extern bool workFinished;
 uint8_t getCurrentPeriodFromTimestamp(uint64_t timestamp);
 
 
-bool isAfterHours();
-void closeMarket();
+bool isAfterHours(uint64_t timestamp);
+void closeMarket(uint64_t timestamp);
 bool isWorkFinished();
 
 #endif // NASDAQ_UTILS_TIME_UTILS_H_

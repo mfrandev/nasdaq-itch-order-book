@@ -37,14 +37,15 @@ class TradeNonCross : public Message {
         matchNumber(matchNumber)
         {}
 
-        void processMessage() const override {
-            if(isAfterHours()) return;
+        bool processMessage() const override {
+            if(isAfterHours(header.getTimestamp())) return false;
             VWAPManager::getInstance().handleTrade(
                 header.getTimestamp(), 
                 header.getStockLocate(), 
                 price, 
                 shares, 
                 matchNumber);
+            return true;
         }
 
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }

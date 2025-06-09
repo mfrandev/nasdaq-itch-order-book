@@ -44,14 +44,12 @@ Message* ProcessMessage::getMessage(const char *data, size_t bytesToRead, Binary
     {
     case MESSAGE_TYPE_ADD_ORDER_NO_MPID:
     {
-        // if(!isAfterHours()) return;
         return parseAddOrderBody(std::move(header), data);
         // fmt::println("1. Adding: {},{},{},{},{}", addOrder.getOrderReferenceNumber(), addOrder.getBuySellIndicator(), addOrder.getShares(), addOrder.getStock(), addOrder.getPrice());
     }
     break;
     case MESSAGE_TYPE_ADD_ORDER_WITH_MPID:
     {
-        // if(!isAfterHours()) return;
         return parseAddOrderMPIDBody(std::move(header), data);
         // fmt::println("2. Adding: {},{},{},{},{},{}", addOrderMPID.getOrderReferenceNumber(), addOrderMPID.getBuySellIndicator(), addOrderMPID.getShares(), addOrderMPID.getStock(), addOrderMPID.getPrice(), addOrderMPID.getAttribution());
     }
@@ -64,49 +62,42 @@ Message* ProcessMessage::getMessage(const char *data, size_t bytesToRead, Binary
     break;
     case MESSAGE_TYPE_TRADE_CROSS:
     {
-        if(isAfterHours()) return nullptr;
         return parseCrossTradeBody(std::move(header), data);
         // fmt::println("3. {},{},{},{},{}", crossTrade.getShares(), crossTrade.getStock(), crossTrade.getCrossPrice(), crossTrade.getMatchNumber(), crossTrade.getCrossType());
     }
     break;
     case MESSAGE_TYPE_ORDER_CANCELLED:
     {
-        // if(!isAfterHours()) return;
         return parseOrderCancelBody(std::move(header), data);
         // fmt::println("4. {},{}",orderCancel.getOrderReferenceNumber(), orderCancel.getCancelledShares());
     }
     break;
     case MESSAGE_TYPE_ORDER_DELETE:
     {
-        // if(!isAfterHours()) return;
         return parseOrderDeleteBody(std::move(header), data);
         // fmt::println("5. Deleting: {}", orderDelete.getOrderReferenceNumber());
     }
     break;
     case MESSAGE_TYPE_ORDER_EXECUTED:
     {
-        if(isAfterHours()) return nullptr;
         return parseOrderExecutedBody(std::move(header), data);
         // fmt::println("6. {},{},{}", orderExecuted.getOrderReferenceNumber(), orderExecuted.getExecutedShares(), orderExecuted.getMatchNumber());
     }
     break;
     case MESSAGE_TYPE_ORDER_EXECUTED_WITH_PRICE:
     {
-        if(isAfterHours()) return nullptr;
         return parseOrderExecutedWithPriceBody(std::move(header), data);
         // fmt::println("7. {},{},{},{},{}", orderExecutedWithPrice.getOrderReferenceNumber(), orderExecutedWithPrice.getExecutedShares(), orderExecutedWithPrice.geMtatchNumber(), orderExecutedWithPrice.getPrintable(), orderExecutedWithPrice.getExecutionPrice());
     }
     break;
     case MESSAGE_TYPE_ORDER_REPLACE:
     {
-        // if(!isAfterHours()) return;
         return parseOrderReplaceBody(std::move(header), data);
         // fmt::println("8. {},{},{},{}", orderReplace.getOriginalOrderReferenceNumber(), orderReplace.getNewOrderReferenceNumber(), orderReplace.getShares(), orderReplace.getPrice());
     }
     break;
     case MESSAGE_TYPE_STOCK_TRADING_ACTION:
     {
-        // if(!isAfterHours()) return;
         return parseStockTradingActionBody(std::move(header), data);
         // fmt::println("9. StockLocate {}: {},{},{},{}", header.getStockLocate(), stockTradingAction->stock, stockTradingAction->tradingState, stockTradingAction->reserved, stockTradingAction->reason);
     }
@@ -119,7 +110,6 @@ Message* ProcessMessage::getMessage(const char *data, size_t bytesToRead, Binary
     break;
     case MESSAGE_TYPE_TRADE_NON_CROSS:
     {
-        if(isAfterHours()) return nullptr;
         // fmt::println("10. {},{},{},{},{},{}", tradeNonCross.getOrderReferenceNumber(), tradeNonCross.getBuySellIndicator(), tradeNonCross.getShares(), tradeNonCross.geStock(), tradeNonCross.getPrice(), tradeNonCross.getMatchNumber());
         return parseTradeNonCrossBody(std::move(header), data);
     }

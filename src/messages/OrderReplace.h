@@ -25,13 +25,14 @@ class OrderReplace : public Message {
         price(price)
         {}
 
-        void processMessage() const override {
+        bool processMessage() const override {
             OrderBook::getInstance().replaceActiveOrder(
                 header.getStockLocate(), 
                 originalOrderReferenceNumber, 
                 newOrderReferenceNumber, 
                 shares, 
                 price);
+            return true;
         }
 
         void setOriginalOrderReferenceNumber(uint64_t originalOrderReferenceNumber) { this -> originalOrderReferenceNumber = originalOrderReferenceNumber; }

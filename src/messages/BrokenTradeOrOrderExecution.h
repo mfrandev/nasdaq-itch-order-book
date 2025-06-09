@@ -17,7 +17,7 @@ class BrokenTradeOrOrderExecution : public Message {
         matchNumber(matchNumber)
         {}
 
-        void processMessage() const override { VWAPManager::getInstance().handleBrokenTrade(header.getStockLocate(), matchNumber); }
+        bool processMessage() const override { VWAPManager::getInstance().handleBrokenTrade(header.getStockLocate(), matchNumber); return true; }
 
         void setMatchNumber(uint64_t matchNumber) { this -> matchNumber = matchNumber; }
         uint64_t getMatchNumber() const { return this -> matchNumber; } 

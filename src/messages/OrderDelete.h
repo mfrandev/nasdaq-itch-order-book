@@ -19,7 +19,7 @@ class OrderDelete : public Message {
         orderReferenceNumber(orderReferenceNumber)
         {}
 
-        void processMessage() const override { OrderBook::getInstance().deleteActiveOrder(orderReferenceNumber); }
+        bool processMessage() const override { OrderBook::getInstance().deleteActiveOrder(orderReferenceNumber); return true; }
 
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
         uint64_t getOrderReferenceNumber() const { return this -> orderReferenceNumber; }

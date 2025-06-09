@@ -31,9 +31,10 @@ class CrossTrade : public Message {
         crossType(crossType) 
         {}
 
-        void processMessage() const override {
-            if(isAfterHours()) return;
+        bool processMessage() const override {
+            if(isAfterHours(header.getTimestamp())) return false;
             VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getTimestamp(), crossPrice, shares, matchNumber);
+            return true;
         }
 
         void setShares(uint64_t shares) { this -> shares = shares; }

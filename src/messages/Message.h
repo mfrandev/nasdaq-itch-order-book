@@ -19,7 +19,7 @@ class Message {
         header(std::move(header))
         {}
         virtual ~Message() = default;
-        virtual void processMessage() const = 0; 
+        virtual bool processMessage() const = 0; 
 
         const BinaryMessageHeader& getHeader() const { return header; }
 };

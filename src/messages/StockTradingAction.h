@@ -40,7 +40,7 @@ class StockTradingAction : public Message {
         reason(std::move(reason))
         {}
 
-        void processMessage() const override { VWAPManager::getInstance().handleStockTradingAction(header.getStockLocate(), stock, tradingState); }
+        bool processMessage() const override { VWAPManager::getInstance().handleStockTradingAction(header.getStockLocate(), stock, tradingState); return true; }
 
         void setStock(std::string stock) { this -> stock = std::move(stock); }
         void setTradingState(char tradingState) { this -> tradingState = tradingState; }

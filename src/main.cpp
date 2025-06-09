@@ -43,9 +43,10 @@ int main(int argc, char* argv[]) {
     LockfreeSPSC& mq = LockfreeSPSC::getInstance();
 
     extern bool workFinished;
-    
+    // uint64_t consumerCounter = 0;
+    // uint64_t throwawayCounter = 0;
     // Launch the "ITCH Messages" Queue processing thread
-    std::thread itchConsumer([&mq] {
+    std::thread itchConsumer([&mq/*, &consumerCounter, &throwawayCounter*/] {
         uint64_t previousTimestamp = 0;
         uint64_t counter = 0;
         while(true) { // Sets to true once EVENT_CODE_END_OF_SYSTEM_HOURS event comes in
@@ -57,26 +58,35 @@ int main(int argc, char* argv[]) {
 
             Message* messagePtr = nullptr;
             bool success = mq.popMesageFromLockfreeSPSCQueue(messagePtr);
-            assert(success && messagePtr != nullptr); // If this fails, we lost sequentiality invariant
+            assert(success); // If this fails, we lost sequentiality invariant
+            // consumerCounter++;
+            if(messagePtr == nullptr) {
+                delete messagePtr;
+                // throwawayCounter++;
+                continue;
+            }
             
             // Use RAII to transfer ownership to the unique_ptr for safe memory management
             // std::unique_ptr<Message> message(messagePtr);
 
             uint64_t currentTimestamp = messagePtr -> getHeader().getTimestamp();
+            // Bookkeep time
+            ProcessMessage::processHeaderTimestamp(currentTimestamp);
             // fmt::println("current: {}, prev: {}", currentTimestamp, previousTimestamp);
             assert(previousTimestamp <= currentTimestamp || previousTimestamp == 0); // Similarly, we are processing messages out of order if this is ever false
             previousTimestamp = currentTimestamp;
             
             // Do bookkeeping, etc.
             messagePtr -> processMessage();
-            counter++;
+            // if(!processed) throwawayCounter++;
             delete messagePtr;
         }
-        fmt::println("Exiting the consumer thread, processed {} messages", counter);
+        fmt::println("Exiting the consumer thread");
     });
 
     // And here is the magic
-    uint64_t counter = 0;
+    // uint64_t counter = 0;
+    // uint64_t counterToQueue = 0;
     while(file) {
 
         // For some reason, there happens to be two leading bytes at the start of each line
@@ -84,30 +94,29 @@ int main(int argc, char* argv[]) {
         BinaryMessageHeader header = parseHeader(&buffer[NUMBER_OF_BYTES_OFFSET_FOR_HEADER_CHUNK]);
         // fmt::println("{}. {} {} /*{} */{}", ++counter, header.getMessageType(), header.getStockLocate(), /*header.getTrackingNumber(),*/ header.getTimestamp());
 
-        // Bookkeep time
-        ProcessMessage::processHeaderTimestamp(header.getTimestamp());
-
         // Get the message body 
         std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header.getMessageType());
         file.read(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody);
 
         // Parse the binary message, then add to the processing queue (if not nullptr)
         Message* messagePtr = ProcessMessage::getMessage(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, std::move(header));
+        if(messagePtr == nullptr) {
+            delete messagePtr;
+            continue;
+        }
         // std::unique_ptr<Message> message(messagePtr);
-        if(messagePtr == nullptr) continue;
+        // counter++;
 
-        // Implement basic backoff logic to make sure that the CPU will add the entry to the queue faster than if it immediately used yield or sleep.
-        int backoff = 0;
         while(mq.write_available() == 0) {
             std::this_thread::yield();
         }
         bool success = mq.pushMesageToLockfreeSPSCQueue(messagePtr);
-        counter++;
         assert(success); // If this fails, we lost sequentiality invariant
+        // counterToQueue++;
     }
     // Close file
     file.close();
-    fmt::print("Done producing messages, posed {} to the queue", counter);
+    // fmt::println("Processed {} messages, {} were passed to the queue and {} were consumed. {} were nullptr or afterhours for a total of {} fully processed", counter, counterToQueue, consumerCounter, throwawayCounter, consumerCounter - throwawayCounter);
     workFinished = true;
 
     // Synchronize the producer (main) and consumer threads.

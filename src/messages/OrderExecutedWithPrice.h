@@ -29,8 +29,8 @@ struct OrderExecutedWithPrice : public Message {
         executionPrice(executionPrice)
         {}
 
-        void processMessage() const override { 
-            if(isAfterHours()) return;
+        bool processMessage() const override { 
+            if(isAfterHours(header.getTimestamp())) return false;            
             VWAPManager::getInstance().handleOrderExecutedWithPrice(
                 header.getTimestamp(), 
                 header.getStockLocate(), 
@@ -40,6 +40,7 @@ struct OrderExecutedWithPrice : public Message {
                 printable,
                 executionPrice
             );
+            return true;
         } 
 
         void getOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }

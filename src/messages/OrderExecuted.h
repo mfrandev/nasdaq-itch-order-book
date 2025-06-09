@@ -24,15 +24,16 @@ class OrderExecuted : public Message {
         matchNumber(matchNumber)
         {}
 
-        void processMessage() const override { 
-            if(isAfterHours()) return;
-            VWAPManager::getInstance().handleOrderExecuted(
+        bool processMessage() const override { 
+            if(isAfterHours(header.getTimestamp())) return false;
+                VWAPManager::getInstance().handleOrderExecuted(
                 header.getTimestamp(), 
                 header.getStockLocate(), 
                 orderReferenceNumber, 
                 executedShares, 
                 matchNumber
             );
+            return true;
         } 
 
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
