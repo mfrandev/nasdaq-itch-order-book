@@ -1,7 +1,5 @@
 #include <CrossTrade.h>
 
-#include <cstring>
-
 #include <StockTradingAction.h>
 #include <string_utils.h>
 #include <endian_utils.h>
@@ -9,7 +7,7 @@
 /**
  * Parse the cross trade body from the binary buffer
  */
-CrossTrade parseCrossTradeBody(const char* data) {
+CrossTrade* parseCrossTradeBody(BinaryMessageHeader header, const char* data) {
     size_t offset = 0;
     uint64_t shares = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
@@ -21,5 +19,5 @@ CrossTrade parseCrossTradeBody(const char* data) {
     uint64_t matchNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
     char crossType = data[offset];
-    return CrossTrade(shares, stock, crossPrice, matchNumber, crossType);
+    return new CrossTrade(std::move(header), shares, stock, crossPrice, matchNumber, crossType);
 }

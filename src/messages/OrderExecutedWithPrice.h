@@ -4,8 +4,13 @@
 #include <cstdint>
 #include <stdlib.h>
 
+#include <Message.h>
+
+#include <time_utils.h>
+#include <VWAPManager.h>
+
 // Store all other fields for the OrderExecutedWithPrice message here
-struct OrderExecutedWithPrice {
+struct OrderExecutedWithPrice : public Message {
 
     private:
         uint64_t orderReferenceNumber;
@@ -15,13 +20,28 @@ struct OrderExecutedWithPrice {
         uint32_t executionPrice;
 
     public:
-        OrderExecutedWithPrice(uint64_t orderReferenceNumber, uint32_t executedShares, uint64_t matchNumber, char printable, uint32_t executionPrice) :
+        OrderExecutedWithPrice(BinaryMessageHeader header, uint64_t orderReferenceNumber, uint32_t executedShares, uint64_t matchNumber, char printable, uint32_t executionPrice) :
+        Message(std::move(header)),
         orderReferenceNumber(orderReferenceNumber),
         executedShares(executedShares),
         matchNumber(matchNumber),
         printable(printable),
         executionPrice(executionPrice)
         {}
+
+        bool processMessage() const override { 
+            if(isAfterHours(header.getTimestamp())) return false;            
+            VWAPManager::getInstance().handleOrderExecutedWithPrice(
+                header.getTimestamp(), 
+                header.getStockLocate(), 
+                orderReferenceNumber,
+                executedShares,
+                matchNumber,
+                printable,
+                executionPrice
+            );
+            return true;
+        } 
 
         void getOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
         void getExecutedShares(uint32_t executedShares) { this -> executedShares = executedShares; }
@@ -36,6 +56,6 @@ struct OrderExecutedWithPrice {
         uint32_t getExecutionPrice() const { return this -> executionPrice; }
 };
 
-OrderExecutedWithPrice parseOrderExecutedWithPriceBody(const char* data);
+OrderExecutedWithPrice* parseOrderExecutedWithPriceBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_ORDER_EXECUTED_WITH_PRICE_H_

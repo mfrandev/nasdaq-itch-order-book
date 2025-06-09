@@ -3,20 +3,27 @@
 
 #include <cstdint>
 
+#include <Message.h>
+
+#include <VWAPManager.h>
+
 // Class to store the Broken Trade or Order Execution message body
-class BrokenTradeOrOrderExecution {
+class BrokenTradeOrOrderExecution : public Message {
     private:
         uint64_t matchNumber;
     public:
-        BrokenTradeOrOrderExecution(uint64_t matchNumber) :
+        BrokenTradeOrOrderExecution(BinaryMessageHeader header, uint64_t matchNumber) :
+        Message(std::move(header)),
         matchNumber(matchNumber)
         {}
+
+        bool processMessage() const override { VWAPManager::getInstance().handleBrokenTrade(header.getStockLocate(), matchNumber); return true; }
 
         void setMatchNumber(uint64_t matchNumber) { this -> matchNumber = matchNumber; }
         uint64_t getMatchNumber() const { return this -> matchNumber; } 
 };
 
 // Parse the Broken Trade or Order Execution message body
-BrokenTradeOrOrderExecution parseBrokenTradeOrOrderExecutionBody(const char* data);
+BrokenTradeOrOrderExecution* parseBrokenTradeOrOrderExecutionBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_BROKEN_TRADE_OR_ORDER_EXECUTION_H_

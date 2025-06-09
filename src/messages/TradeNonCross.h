@@ -4,10 +4,15 @@
 #include <cstdint>
 #include <string>
 
+#include <Message.h>
+#include <time_utils.h>
+
+#include <VWAPManager.h>
+
 // constexpr size_t BUY_SELL_INDICATOR_SIZE = 1; Initialized in AddOrder.h
 // constexpr size_t STOCK_SIZE           = 8; Initialized in StockTradingAction.h
 // For parsing a Trade (non-cross) message
-class TradeNonCross {
+class TradeNonCross : public Message {
 
     private:
         uint64_t orderReferenceNumber;
@@ -21,16 +26,27 @@ class TradeNonCross {
 
         /**
          * Rule of 5 compliant
-         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases. 
          */
-        TradeNonCross(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, const std::string& stock, uint32_t price, uint64_t matchNumber) :
+        TradeNonCross(BinaryMessageHeader header, uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, std::string stock, uint32_t price, uint64_t matchNumber) :
+        Message(std::move(header)),
         orderReferenceNumber(orderReferenceNumber),
         buySellIndicator(buySellIndicator),
         shares(shares),
-        stock(stock),
+        stock(std::move(stock)),
         price(price),
         matchNumber(matchNumber)
         {}
+
+        bool processMessage() const override {
+            if(isAfterHours(header.getTimestamp())) return false;
+            VWAPManager::getInstance().handleTrade(
+                header.getTimestamp(), 
+                header.getStockLocate(), 
+                price, 
+                shares, 
+                matchNumber);
+            return true;
+        }
 
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
         void setBuySellIndicator(char buySellIndicator) { this -> buySellIndicator = buySellIndicator; }
@@ -47,6 +63,6 @@ class TradeNonCross {
         uint64_t getMatchNumber() const { return this -> matchNumber; }
 };
 
-TradeNonCross parseTradeNonCrossBody(const char* data);
+TradeNonCross* parseTradeNonCrossBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_TRADE_NON_CROSS_H_

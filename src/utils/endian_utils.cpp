@@ -1,6 +1,6 @@
 #include <endian_utils.h>
 
-#include <cstring>
+
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 /**

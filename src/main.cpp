@@ -3,11 +3,14 @@
 #include <fmt/format.h>
 #include <chrono>
 #include <string>
+#include <thread>
 
 #include <ProcessMessage.h>
 #include <MessageHeader.h>
+#include <VWAPManager.h>
 
-#include <unordered_map>
+#include <queue_utils.h>
+#include <time_utils.h>
 
 /**
  * Parse and calculate a VWAP for a binary NASDAQ ITCH 5.0 file
@@ -37,8 +40,53 @@ int main(int argc, char* argv[]) {
     constexpr std::size_t bufferSize = 64;  // 64 is a pretty ok buffer size. The largest message is 50 bytes, so why not leave a few more for good measure.
     std::vector<char> buffer(bufferSize);
 
+    LockfreeSPSC& mq = LockfreeSPSC::getInstance();
+
+    extern bool workFinished;
+    // uint64_t consumerCounter = 0;
+    // uint64_t throwawayCounter = 0;
+    // Launch the "ITCH Messages" Queue processing thread
+    std::thread itchConsumer([&mq/*, &consumerCounter, &throwawayCounter*/] {
+        uint64_t previousTimestamp = 0;
+        uint64_t counter = 0;
+        while(true) { // Sets to true once EVENT_CODE_END_OF_SYSTEM_HOURS event comes in
+            if (mq.read_available() == 0) {
+                if (isWorkFinished()) break; // Exit cleanly
+                std::this_thread::yield();
+                continue;
+            }
+
+            Message* messagePtr = nullptr;
+            bool success = mq.popMesageFromLockfreeSPSCQueue(messagePtr);
+            assert(success); // If this fails, we lost sequentiality invariant
+            // consumerCounter++;
+            if(messagePtr == nullptr) {
+                delete messagePtr;
+                // throwawayCounter++;
+                continue;
+            }
+            
+            // Use RAII to transfer ownership to the unique_ptr for safe memory management
+            // std::unique_ptr<Message> message(messagePtr);
+
+            uint64_t currentTimestamp = messagePtr -> getHeader().getTimestamp();
+            // Bookkeep time
+            ProcessMessage::processHeaderTimestamp(currentTimestamp);
+            // fmt::println("current: {}, prev: {}", currentTimestamp, previousTimestamp);
+            assert(previousTimestamp <= currentTimestamp || previousTimestamp == 0); // Similarly, we are processing messages out of order if this is ever false
+            previousTimestamp = currentTimestamp;
+            
+            // Do bookkeeping, etc.
+            messagePtr -> processMessage();
+            // if(!processed) throwawayCounter++;
+            delete messagePtr;
+        }
+        fmt::println("Exiting the consumer thread");
+    });
+
     // And here is the magic
-    uint64_t counter = 0;
+    // uint64_t counter = 0;
+    // uint64_t counterToQueue = 0;
     while(file) {
 
         // For some reason, there happens to be two leading bytes at the start of each line
@@ -50,11 +98,34 @@ int main(int argc, char* argv[]) {
         std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header.getMessageType());
         file.read(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody);
 
-        // Highest level function call for maintaining books and calculating VWAP
-        ProcessMessage::parseAndProcessMessageBody(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, header);
+        // Parse the binary message, then add to the processing queue (if not nullptr)
+        Message* messagePtr = ProcessMessage::getMessage(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, std::move(header));
+        if(messagePtr == nullptr) {
+            delete messagePtr;
+            continue;
+        }
+        // std::unique_ptr<Message> message(messagePtr);
+        // counter++;
+
+        while(mq.write_available() == 0) {
+            std::this_thread::yield();
+        }
+        bool success = mq.pushMesageToLockfreeSPSCQueue(messagePtr);
+        assert(success); // If this fails, we lost sequentiality invariant
+        // counterToQueue++;
     }
     // Close file
     file.close();
+    // fmt::println("Processed {} messages, {} were passed to the queue and {} were consumed. {} were nullptr or afterhours for a total of {} fully processed", counter, counterToQueue, consumerCounter, throwawayCounter, consumerCounter - throwawayCounter);
+    workFinished = true;
+
+    // Synchronize the producer (main) and consumer threads.
+    fmt::println("Waiting on consumer thread to join... Is work done? {}", isWorkFinished());
+    if(itchConsumer.joinable()) itchConsumer.join();
+    fmt::println("Consumer thread joined.");
+
+    // Produce the output
+    VWAPManager::getInstance().outputBrokenTradeAdjustedVWAP();
 
     auto end = std::chrono::system_clock::now();
     // Convert nanos to seconds

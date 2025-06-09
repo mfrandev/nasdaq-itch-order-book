@@ -14,17 +14,20 @@ FetchContent_Declare(
   GIT_TAG        e69e5f977d458f2650bb346dadf2ad30c5320281) # 10.2.1
 FetchContent_MakeAvailable(fmt)
 
+find_package(Boost REQUIRED)
+
 include_directories(
     "."
     "./bookkeeping" 
     "./messages"
     "./utils"
+    ${Boost_INCLUDE_DIRS}
 )
 
 file(GLOB SOURCES
   "main.cpp"
-  "./messages/*.cpp"
   "./bookkeeping/*.cpp"
+  "./messages/*.cpp"
   "./utils/*.cpp"
 )
 

@@ -5,8 +5,8 @@
 /**
  * Parse the OrderDelete body
  */
-OrderDelete parseOrderDeleteBody(const char* data) {
+OrderDelete* parseOrderDeleteBody(BinaryMessageHeader header, const char* data) {
     size_t offset = 0;
     uint64_t orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
-    return OrderDelete(orderReferenceNumber);
+    return new OrderDelete(std::move(header), orderReferenceNumber);
 }

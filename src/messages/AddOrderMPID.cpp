@@ -1,6 +1,6 @@
 #include <AddOrderMPID.h>
 
-#include <cstring>
+
 
 #include <StockTradingAction.h>
 #include <AddOrder.h>
@@ -10,7 +10,7 @@
 /** 
  * Parse the AddOrderMPID message body
  */
-AddOrderMPID parseAddOrderMPIDBody(const char* data) {
+AddOrderMPID* parseAddOrderMPIDBody(BinaryMessageHeader header, const char* data) {
     size_t offset = 0;
     uint64_t orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is an 8 byte int
     offset += 8;
@@ -25,5 +25,5 @@ AddOrderMPID parseAddOrderMPIDBody(const char* data) {
     offset += 4;
     std::string attribution = std::string(&data[offset], ATTRIBUTION_SIZE);
     stripWhitespaceFromCPPString(attribution);
-    return AddOrderMPID(orderReferenceNumber, buySellIndicator, shares, stock, price, attribution);
+    return new AddOrderMPID(std::move(header), orderReferenceNumber, buySellIndicator, shares, stock, price, attribution);
 }

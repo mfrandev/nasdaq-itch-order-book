@@ -1,13 +1,13 @@
 #include <OrderExecutedWithPrice.h>
 
-#include <cstring>
+
 
 #include <endian_utils.h>
 
 /**
  * Parse the orderExecutedWithPrice message body
  */
-OrderExecutedWithPrice parseOrderExecutedWithPriceBody(const char* data) {
+OrderExecutedWithPrice* parseOrderExecutedWithPriceBody(BinaryMessageHeader header, const char* data) {
     size_t offset = 0;
     uint64_t orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is 8 bytes
     offset += 8;
@@ -18,5 +18,5 @@ OrderExecutedWithPrice parseOrderExecutedWithPriceBody(const char* data) {
     char printable = data[offset];
     offset += 1;
     uint32_t executionPrice = toHostEndianUpTo64(&data[offset], 4); // We know this is 4 bytes
-    return OrderExecutedWithPrice(orderReferenceNumber, executedShares, matchNumber, printable, executionPrice);
+    return new OrderExecutedWithPrice(std::move(header), orderReferenceNumber, executedShares, matchNumber, printable, executionPrice);
 }

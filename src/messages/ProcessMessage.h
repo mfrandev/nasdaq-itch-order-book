@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <cstdint>
-#include <memory>
 
+#include <Message.h>
 #include <MessageHeader.h>
 
 extern uint64_t marketClosedTimestamp;
@@ -81,7 +81,8 @@ constexpr size_t MESSAGE_SIZE_DLCR_PRICE_DISCOVERY        = 37; // 1.8
 
 namespace ProcessMessage {
     size_t messageTypeToNumberOfBytes(char messageType);
-
-    void parseAndProcessMessageBody(const char* data,  size_t bytesToRead, const BinaryMessageHeader& header);
+    Message* getMessage(const char *data, size_t bytesToRead, BinaryMessageHeader header);
+    void processHeaderTimestamp(uint64_t timestamp);
 }
+
 #endif //NASDAQ_MESSAGES_PROCESS_MESSAGE_H_

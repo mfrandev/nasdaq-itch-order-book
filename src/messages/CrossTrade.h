@@ -4,8 +4,13 @@
 #include <cstdint>
 #include <string>
 
+#include <Message.h>
+
+#include <time_utils.h>
+#include <VWAPManager.h>
+
 // Class for parsing the CrossTrade binary message
-class CrossTrade {
+class CrossTrade : public Message {
     private:
         uint64_t shares;
         std::string stock;
@@ -16,15 +21,21 @@ class CrossTrade {
     public:
         /**
          * Rule of 5 compliant
-         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
          */
-        CrossTrade(uint64_t shares, const std::string& stock, uint32_t crossPrice, uint64_t matchNumber, char crossType) :
+        CrossTrade(BinaryMessageHeader header, uint64_t shares, std::string stock, uint32_t crossPrice, uint64_t matchNumber, char crossType) :
+        Message(std::move(header)),
         shares(shares),
-        stock(stock),
+        stock(std::move(stock)),
         crossPrice(crossPrice),
         matchNumber(matchNumber),
         crossType(crossType) 
         {}
+
+        bool processMessage() const override {
+            if(isAfterHours(header.getTimestamp())) return false;
+            VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getTimestamp(), crossPrice, shares, matchNumber);
+            return true;
+        }
 
         void setShares(uint64_t shares) { this -> shares = shares; }
         void setStock(std::string stock) { this -> stock = std::move(stock); }
@@ -39,6 +50,6 @@ class CrossTrade {
         char getCrossType() const { return this -> crossType; }
 };
 
-CrossTrade parseCrossTradeBody(const char* data);
+CrossTrade* parseCrossTradeBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_CROSS_TRADE_H_

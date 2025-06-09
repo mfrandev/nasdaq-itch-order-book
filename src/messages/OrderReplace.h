@@ -3,8 +3,12 @@
 
 #include <cstdint>
 
+#include <Message.h>
+
+#include <OrderBook.h>
+
 // Class to store the Order Replace message body
-class OrderReplace {
+class OrderReplace : public Message {
 
     private: 
         uint64_t originalOrderReferenceNumber;
@@ -13,12 +17,23 @@ class OrderReplace {
         uint32_t price;
 
     public:
-        OrderReplace(uint64_t originalOrderReferenceNumber, uint64_t newOrderReferenceNumber, uint32_t shares, uint32_t price) :
+        OrderReplace(BinaryMessageHeader header, uint64_t originalOrderReferenceNumber, uint64_t newOrderReferenceNumber, uint32_t shares, uint32_t price) :
+        Message(std::move(header)),
         originalOrderReferenceNumber(originalOrderReferenceNumber),
         newOrderReferenceNumber(newOrderReferenceNumber),
         shares(shares),
         price(price)
         {}
+
+        bool processMessage() const override {
+            OrderBook::getInstance().replaceActiveOrder(
+                header.getStockLocate(), 
+                originalOrderReferenceNumber, 
+                newOrderReferenceNumber, 
+                shares, 
+                price);
+            return true;
+        }
 
         void setOriginalOrderReferenceNumber(uint64_t originalOrderReferenceNumber) { this -> originalOrderReferenceNumber = originalOrderReferenceNumber; }
         void setNewOrderReferenceNumber(uint64_t newOrderReferenceNumber) { this -> newOrderReferenceNumber = newOrderReferenceNumber; }
@@ -32,6 +47,6 @@ class OrderReplace {
 };
 
 // Parse the order replace message body
-OrderReplace parseOrderReplaceBody(const char* data);
+OrderReplace* parseOrderReplaceBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_ORDER_REPLACE_H_

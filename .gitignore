@@ -7,6 +7,6 @@
 **/.DS_Store
 **/*Output
 !LiveOutput/
-!SampleOutput/
+!SampleOutput*/
 **/vwap_*
 !**/vwap_placeholder.txt
