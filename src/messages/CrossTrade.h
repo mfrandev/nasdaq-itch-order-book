@@ -33,7 +33,7 @@ class CrossTrade : public Message {
 
         bool processMessage() const override {
             if(isAfterHours(header.getTimestamp())) return false;
-            VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getTimestamp(), crossPrice, shares, matchNumber);
+            VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getStockLocate(), crossPrice, shares, matchNumber);
             return true;
         }
 

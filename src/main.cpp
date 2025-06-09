@@ -60,6 +60,8 @@ int main(int argc, char* argv[]) {
             bool success = mq.popMesageFromLockfreeSPSCQueue(messagePtr);
             assert(success); // If this fails, we lost sequentiality invariant
             // consumerCounter++;
+            
+            // For extra safety, but should never be true
             if(messagePtr == nullptr) {
                 delete messagePtr;
                 // throwawayCounter++;
