@@ -4,6 +4,7 @@
 
 uint8_t currentPeriod = 0;
 char isAfterhours = false;
+bool workFinished = false;
 
 /** 
  * Get the current period from a timestamp 
@@ -18,4 +19,8 @@ bool isAfterHours() {
 
 void closeMarket() {
     isAfterhours = true;
+}
+
+bool isWorkFinished() {
+    return workFinished;
 }

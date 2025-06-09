@@ -3,8 +3,13 @@
 
 #include <cstdint>
 
+#include <Message.h>
+
+#include <time_utils.h>
+#include <VWAPManager.h>
+
 // Store all other fields for the OrderExecuted message here
-class OrderExecuted {
+class OrderExecuted : public Message {
 
     private: 
         uint64_t orderReferenceNumber;
@@ -12,11 +17,23 @@ class OrderExecuted {
         uint64_t matchNumber;
 
     public:
-        OrderExecuted(uint64_t orderReferenceNumber, uint32_t executedShares, uint64_t matchNumber) :
+        OrderExecuted(BinaryMessageHeader header, uint64_t orderReferenceNumber, uint32_t executedShares, uint64_t matchNumber) :
+        Message(std::move(header)),
         orderReferenceNumber(orderReferenceNumber),
         executedShares(executedShares),
         matchNumber(matchNumber)
         {}
+
+        void processMessage() const override { 
+            if(isAfterHours()) return;
+            VWAPManager::getInstance().handleOrderExecuted(
+                header.getTimestamp(), 
+                header.getStockLocate(), 
+                orderReferenceNumber, 
+                executedShares, 
+                matchNumber
+            );
+        } 
 
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
         void setExecutedShares(uint32_t executedShares) { this -> executedShares = executedShares; }
@@ -27,6 +44,6 @@ class OrderExecuted {
         uint64_t getMatchNumber() const { return this -> matchNumber; }
 };
 
-OrderExecuted parseOrderExecutedBody(const char* data);
+OrderExecuted* parseOrderExecutedBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_ORDER_EXECUTED_H_

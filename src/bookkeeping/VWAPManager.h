@@ -8,13 +8,6 @@
 #include <fmt/os.h>
 #include <fmt/format.h>
 
-#include <BrokenTradeOrOrderExecution.h>
-#include <CrossTrade.h>
-#include <OrderExecuted.h>
-#include <OrderExecutedWithPrice.h>
-#include <StockTradingAction.h>
-#include <TradeNonCross.h>
-
 #include <time_utils.h>
 
 constexpr uint32_t TOP_OF_10_PERCENT_BAND = 250000;

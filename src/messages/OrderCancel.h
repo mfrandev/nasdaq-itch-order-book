@@ -3,17 +3,23 @@
 
 #include <cstdint>
 
+#include <Message.h>
+#include <OrderBook.h>
+
 // Class to store the Order Cancel message body
-class OrderCancel {
+class OrderCancel : public Message {
     private: 
         uint64_t orderReferenceNumber;
         uint32_t cancelledShares;
 
     public: 
-        OrderCancel(uint64_t orderReferenceNumber, uint32_t cancelledShares) :
+        OrderCancel(BinaryMessageHeader header, uint64_t orderReferenceNumber, uint32_t cancelledShares) :
+        Message(std::move(header)),
         orderReferenceNumber(orderReferenceNumber),
         cancelledShares(cancelledShares)
         {}
+
+        void processMessage() const override { OrderBook::getInstance().cancelActiveOrder(orderReferenceNumber, cancelledShares); } 
 
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
         void setCancelledShares(uint32_t cancelledShares) { this -> cancelledShares = cancelledShares; }
@@ -23,6 +29,6 @@ class OrderCancel {
 };
 
 // Parse the order cancel message body
-OrderCancel parseOrderCancelBody(const char* data);
+OrderCancel* parseOrderCancelBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_ORDER_CANCEL_H_

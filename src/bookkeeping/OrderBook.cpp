@@ -7,10 +7,6 @@
 
 #include <fmt/format.h>
 
-/**
- * Took a memory profile of the OrderBook for the given file, seeing ~0.4% memory usage :)
- */
-
 // Singleton declaration and getter
 OrderBook* OrderBook::_instance = nullptr;
 OrderBook& OrderBook::getInstance() {

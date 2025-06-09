@@ -4,11 +4,16 @@
 #include <string>
 #include <cstdint>
 
+#include <Message.h>
+#include <MessageHeader.h>
+
+#include <OrderBook.h>
+
 constexpr size_t BUY_SELL_INDICATOR_SIZE = 1;
 // constexpr size_t STOCK_SIZE = 8; Use the value from StockTradingAction.h
 
 // Store the Add Order message body
-class AddOrder {
+class AddOrder : public Message {
     private:
         uint64_t orderReferenceNumber;
         char buySellIndicator;
@@ -19,15 +24,17 @@ class AddOrder {
     public:
         /**
          * Rule of 5 compliant
-         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
          */
-        AddOrder(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, const std::string& stock, uint32_t price) :
+        AddOrder(BinaryMessageHeader header, uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, std::string stock, uint32_t price) :
+        Message(std::move(header)),
         orderReferenceNumber(orderReferenceNumber),
         buySellIndicator(buySellIndicator),
         shares(shares),
-        stock(stock),
+        stock(std::move(stock)),
         price(price)
         {}
+
+        void processMessage() const override { OrderBook::getInstance().addToActiveOrders(orderReferenceNumber, header.getStockLocate(), shares, price); }
 
         // Setters
         void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
@@ -44,6 +51,6 @@ class AddOrder {
         uint32_t getPrice() const { return this -> price; }
 };
 
-AddOrder parseAddOrderBody(const char* data);
+AddOrder* parseAddOrderBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_ADD_ORDER_H_

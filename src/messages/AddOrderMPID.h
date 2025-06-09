@@ -4,12 +4,16 @@
 #include <string>
 #include <cstdint>
 
+#include <Message.h>
+
+#include <OrderBook.h>
+
 // constexpr size_t BUY_SELL_INDICATOR_SIZE = 1; Use the value from AddOrder.h
 // constexpr size_t STOCK_SIZE = 8; Use the value from StockTradingAction.h
 constexpr size_t ATTRIBUTION_SIZE = 4;
 
 // Store the Add Order MPID message body
-class AddOrderMPID {
+class AddOrderMPID : public Message {
     private:
         uint64_t orderReferenceNumber;
         char buySellIndicator;
@@ -21,16 +25,19 @@ class AddOrderMPID {
     public:
         /**
          * Rule-of-5 compliant
-         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
          */
-        AddOrderMPID(uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, const std::string& stock, uint32_t price, const std::string& attribution) :
+        AddOrderMPID(BinaryMessageHeader header, uint64_t orderReferenceNumber, char buySellIndicator, uint32_t shares, std::string stock, uint32_t price, std::string attribution) :
+            Message(std::move(header)),
             orderReferenceNumber(orderReferenceNumber),
             buySellIndicator(buySellIndicator),
             shares(shares),
-            stock(stock),
+            stock((std::move(stock))),
             price(price),
-            attribution(attribution)
+            attribution(std::move(attribution))
             {}
+
+            void processMessage() const override { OrderBook::getInstance().addToActiveOrders(orderReferenceNumber, header.getStockLocate(), shares, price); }
+
 
             // Setters
             void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }
@@ -49,6 +56,6 @@ class AddOrderMPID {
             std::string getAttribution() const { return this -> attribution; }
 };
 
-AddOrderMPID parseAddOrderMPIDBody(const char* data);
+AddOrderMPID* parseAddOrderMPIDBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_ADD_ORDER_MPID_H_

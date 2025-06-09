@@ -25,8 +25,8 @@ class BinaryMessageHeader {
         ~BinaryMessageHeader() = default;
         BinaryMessageHeader(const BinaryMessageHeader&) = default;
         BinaryMessageHeader& operator=(const BinaryMessageHeader&) = default;
-        BinaryMessageHeader(BinaryMessageHeader&&) noexcept = default;
-        BinaryMessageHeader& operator=(BinaryMessageHeader&&) noexcept = default;
+        BinaryMessageHeader(BinaryMessageHeader&& header) noexcept = default;
+        BinaryMessageHeader& operator=(BinaryMessageHeader&& header) noexcept = default;
 
         void setMessageType(char messageType) { this -> messageType = messageType; }
         void setStockLocate(uint16_t stockLocate) { this -> stockLocate = stockLocate; }

@@ -4,6 +4,10 @@
 #include <string>
 #include <cstdint>
 
+#include <Message.h>
+
+#include <VWAPManager.h>
+
 // Trade state reason constants
 constexpr char TRADING_STATE_REASON_HALTED            = 'H';
 constexpr char TRADING_STATE_REASON_PAUSED            = 'P';
@@ -16,7 +20,7 @@ constexpr size_t TRADING_STATE_SIZE = 1;
 constexpr size_t RESERVED_SIZE      = 1;
 constexpr size_t REASON_SIZE        = 4;
 
-class StockTradingAction {
+class StockTradingAction : public Message {
     private:
         std::string stock;
         char tradingState;
@@ -27,14 +31,16 @@ class StockTradingAction {
 
         /**
          * Rule-of-5 implcitly implemented, since char is trivial and std::string is implemented to be compliant as well
-         * Use const std::string& param, since constructor is guaranteed to receive an LValue argument in these cases.
          */
-        StockTradingAction(const std::string& stock, char tradingState, char reserved, const std::string& reason) :
-        stock(stock),
+        StockTradingAction(BinaryMessageHeader header, std::string stock, char tradingState, char reserved, std::string reason) :
+        Message(std::move(header)),
+        stock(std::move(stock)),
         tradingState(tradingState),
         reserved(reserved),
-        reason(reason)
+        reason(std::move(reason))
         {}
+
+        void processMessage() const override { VWAPManager::getInstance().handleStockTradingAction(header.getStockLocate(), stock, tradingState); }
 
         void setStock(std::string stock) { this -> stock = std::move(stock); }
         void setTradingState(char tradingState) { this -> tradingState = tradingState; }
@@ -47,6 +53,6 @@ class StockTradingAction {
         std::string getReason() const { return this -> reason; }
 };
 
-StockTradingAction parseStockTradingActionBody(const char* data);
+StockTradingAction* parseStockTradingActionBody(BinaryMessageHeader header, const char* data);
 
 #endif // NASDAQ_MESSAGES_STOCK_TRADING_ACTION_H_
