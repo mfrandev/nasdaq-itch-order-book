@@ -4,6 +4,7 @@
 #include <chrono>
 #include <string>
 #include <thread>
+#include <memory>
 
 #include <ProcessMessage.h>
 #include <MessageHeader.h>
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]) {
     // Launch the "ITCH Messages" Queue processing thread
     std::thread itchConsumer([&mq/*, &consumerCounter, &throwawayCounter*/] {
         uint64_t previousTimestamp = 0;
-        uint64_t counter = 0;
+        // uint64_t counter = 0;
         while(true) { // Sets to true once EVENT_CODE_END_OF_SYSTEM_HOURS event comes in
             if (mq.read_available() == 0) {
                 if (isWorkFinished()) break; // Exit cleanly
@@ -56,22 +57,14 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            Message* messagePtr = nullptr;
-            bool success = mq.popMesageFromLockfreeSPSCQueue(messagePtr);
+            Message* message = nullptr;
+            bool success = mq.popMesageFromLockfreeSPSCQueue(message);
             assert(success); // If this fails, we lost sequentiality invariant
             // consumerCounter++;
-            
-            // For extra safety, but should never be true
-            if(messagePtr == nullptr) {
-                delete messagePtr;
-                // throwawayCounter++;
-                continue;
-            }
-            
-            // Use RAII to transfer ownership to the unique_ptr for safe memory management
-            // std::unique_ptr<Message> message(messagePtr);
+           
+            if(message == nullptr) continue;
 
-            uint64_t currentTimestamp = messagePtr -> getHeader().getTimestamp();
+            uint64_t currentTimestamp = message -> getHeader().getTimestamp();
             // Bookkeep time
             ProcessMessage::processHeaderTimestamp(currentTimestamp);
             // fmt::println("current: {}, prev: {}", currentTimestamp, previousTimestamp);
@@ -79,9 +72,9 @@ int main(int argc, char* argv[]) {
             previousTimestamp = currentTimestamp;
             
             // Do bookkeeping, etc.
-            messagePtr -> processMessage();
+            message -> processMessage();
             // if(!processed) throwawayCounter++;
-            delete messagePtr;
+            delete message;
         }
         fmt::println("Exiting the consumer thread");
     });
