@@ -2,6 +2,8 @@
 
 #include <endian_utils.h>
 
+MempoolSPSC<OrderExecuted, SPSC_QUEUE_CAPACITY + 2> OrderExecuted::_mempool;
+
 OrderExecuted* parseOrderExecutedBody(BinaryMessageHeader header, const char* data) {
     size_t offset = 0;
     uint64_t orderReferenceNumber = toHostEndianUpTo64(&data[offset], 8); // We know this is 8 bytes

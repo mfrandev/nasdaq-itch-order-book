@@ -9,6 +9,8 @@
 
 #include <VWAPManager.h>
 
+#include <mempool.h>
+
 // constexpr size_t BUY_SELL_INDICATOR_SIZE = 1; Initialized in AddOrder.h
 // constexpr size_t STOCK_SIZE           = 8; Initialized in StockTradingAction.h
 // For parsing a Trade (non-cross) message
@@ -21,6 +23,8 @@ class TradeNonCross : public Message {
         std::string stock;
         uint32_t price;
         uint64_t matchNumber;
+
+        static MempoolSPSC<TradeNonCross, SPSC_QUEUE_CAPACITY + 2> _mempool;
 
     public:
 
@@ -36,6 +40,19 @@ class TradeNonCross : public Message {
         price(price),
         matchNumber(matchNumber)
         {}
+
+        /**
+         * Overload new/delete to use the mempool, rather than heap allocations
+         */
+        void* operator new(size_t) {
+            void* ptr = _mempool.allocate();
+            if (ptr == nullptr) throw std::bad_alloc();
+            return ptr;
+        }
+
+        void operator delete(void* ptr) {
+            _mempool.deallocate(static_cast<TradeNonCross*>(ptr));
+        }
 
         bool processMessage() const override {
             if(isAfterHours(header.getTimestamp())) return false;

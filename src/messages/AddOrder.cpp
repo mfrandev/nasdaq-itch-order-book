@@ -4,6 +4,8 @@
 #include <string_utils.h>
 #include <endian_utils.h>
 
+MempoolSPSC<AddOrder, SPSC_QUEUE_CAPACITY + 2> AddOrder::_mempool;
+
 /** 
  * Parse the AddOrder message body
  */
@@ -19,5 +21,5 @@ AddOrder* parseAddOrderBody(BinaryMessageHeader header, const char* data) {
     stripWhitespaceFromCPPString(stock);
     offset += STOCK_SIZE;
     uint32_t price = toHostEndianUpTo64(&data[offset], 4); // We know this is a 4 byte int
-    return new AddOrder(std::move(header), orderReferenceNumber, buySellIndicator, shares, stock, price);
+    return new AddOrder(std::move(header), orderReferenceNumber, buySellIndicator, shares, std::move(stock), price);
 }

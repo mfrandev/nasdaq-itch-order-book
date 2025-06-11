@@ -8,6 +8,8 @@
 
 #include <VWAPManager.h>
 
+#include <mempool.h>
+
 // Trade state reason constants
 constexpr char TRADING_STATE_REASON_HALTED            = 'H';
 constexpr char TRADING_STATE_REASON_PAUSED            = 'P';
@@ -27,6 +29,8 @@ class StockTradingAction : public Message {
         char reserved;
         std::string reason;
 
+        static MempoolSPSC<StockTradingAction, SPSC_QUEUE_CAPACITY + 2> _mempool;
+
     public:
 
         /**
@@ -39,6 +43,19 @@ class StockTradingAction : public Message {
         reserved(reserved),
         reason(std::move(reason))
         {}
+
+        /**
+         * Overload new/delete to use the mempool, rather than heap allocations
+         */
+        void* operator new(size_t) {
+            void* ptr = _mempool.allocate();
+            if (ptr == nullptr) throw std::bad_alloc();
+            return ptr;
+        }
+
+        void operator delete(void* ptr) {
+            _mempool.deallocate(static_cast<StockTradingAction*>(ptr));
+        }
 
         bool processMessage() const override { VWAPManager::getInstance().handleStockTradingAction(header.getStockLocate(), stock, tradingState); return true; }
 

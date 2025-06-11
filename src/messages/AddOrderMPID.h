@@ -8,6 +8,8 @@
 
 #include <OrderBook.h>
 
+#include <mempool.h>
+
 // constexpr size_t BUY_SELL_INDICATOR_SIZE = 1; Use the value from AddOrder.h
 // constexpr size_t STOCK_SIZE = 8; Use the value from StockTradingAction.h
 constexpr size_t ATTRIBUTION_SIZE = 4;
@@ -21,6 +23,8 @@ class AddOrderMPID : public Message {
         std::string stock;
         uint32_t price;
         std::string attribution;
+
+        static MempoolSPSC<AddOrderMPID, SPSC_QUEUE_CAPACITY + 2> _mempool;
     
     public:
         /**
@@ -38,6 +42,18 @@ class AddOrderMPID : public Message {
 
             bool processMessage() const override { OrderBook::getInstance().addToActiveOrders(orderReferenceNumber, header.getStockLocate(), shares, price); return true; }
 
+            /**
+             * Overload new/delete to use the mempool, rather than heap allocations
+             */
+            void* operator new(size_t) {
+                void* ptr = _mempool.allocate();
+                if (ptr == nullptr) throw std::bad_alloc();
+                return ptr;
+            }
+
+            void operator delete(void* ptr) {
+                _mempool.deallocate(static_cast<AddOrderMPID*>(ptr));
+            }
 
             // Setters
             void setOrderReferenceNumber(uint64_t orderReferenceNumber) { this -> orderReferenceNumber = orderReferenceNumber; }

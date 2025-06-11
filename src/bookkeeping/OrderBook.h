@@ -5,6 +5,8 @@
 #include <string>
 #include <unordered_map>
 
+constexpr uint32_t BYTE_PER_MB = 1048576;
+
 /**
  * Book has two mappings:
  * 1. Order Reference Number -> ActiveOrderData
@@ -21,9 +23,9 @@ struct ExecutedOrderOrTradeData {
 class ActiveOrderData {
 
     private: 
-        uint16_t stockLocate;
         uint32_t numShares;
         uint32_t price;
+        uint16_t stockLocate;
 
     public:
 
@@ -54,6 +56,11 @@ class OrderBook {
     public:
 
         static OrderBook& getInstance();
+
+        // Reserve 64 MB of memory for this map
+        OrderBook() {
+            _activeOrdersBook.reserve((BYTE_PER_MB * 64) / sizeof(ActiveOrderData));
+        }
 
         // Functions for maintaining the book
         void addToActiveOrders(uint64_t orderReferenceNumber, uint16_t stockLocate, uint32_t numShares, uint32_t price);

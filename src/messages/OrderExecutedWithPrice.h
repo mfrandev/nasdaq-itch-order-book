@@ -9,6 +9,8 @@
 #include <time_utils.h>
 #include <VWAPManager.h>
 
+#include <mempool.h>
+
 // Store all other fields for the OrderExecutedWithPrice message here
 struct OrderExecutedWithPrice : public Message {
 
@@ -19,6 +21,8 @@ struct OrderExecutedWithPrice : public Message {
         char printable;
         uint32_t executionPrice;
 
+        static MempoolSPSC<OrderExecutedWithPrice, SPSC_QUEUE_CAPACITY + 2> _mempool;
+
     public:
         OrderExecutedWithPrice(BinaryMessageHeader header, uint64_t orderReferenceNumber, uint32_t executedShares, uint64_t matchNumber, char printable, uint32_t executionPrice) :
         Message(std::move(header)),
@@ -28,6 +32,19 @@ struct OrderExecutedWithPrice : public Message {
         printable(printable),
         executionPrice(executionPrice)
         {}
+
+        /**
+         * Overload new/delete to use the mempool, rather than heap allocations
+         */
+        void* operator new(size_t) {
+            void* ptr = _mempool.allocate();
+            if (ptr == nullptr) throw std::bad_alloc();
+            return ptr;
+        }
+
+        void operator delete(void* ptr) {
+            _mempool.deallocate(static_cast<OrderExecutedWithPrice*>(ptr));
+        }
 
         bool processMessage() const override { 
             if(isAfterHours(header.getTimestamp())) return false;            

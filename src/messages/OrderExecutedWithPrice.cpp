@@ -4,6 +4,8 @@
 
 #include <endian_utils.h>
 
+MempoolSPSC<OrderExecutedWithPrice, SPSC_QUEUE_CAPACITY + 2> OrderExecutedWithPrice::_mempool;
+
 /**
  * Parse the orderExecutedWithPrice message body
  */
