@@ -4,6 +4,8 @@
 
 #include <string_utils.h>
 
+MempoolSPSC<StockTradingAction, SPSC_QUEUE_CAPACITY + 2> StockTradingAction::_mempool;
+
 /**
  * Parse the stock trading action body contents from the buffer
  */

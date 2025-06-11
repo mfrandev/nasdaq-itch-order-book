@@ -17,7 +17,6 @@ OrderBook& OrderBook::getInstance() {
 
 /**
  * Add the active order data to the book.
- * Struct initialized with "malloc" so it can be freed later
  * This should never be called more than once for a give orderReferenceNumber
  */
 void OrderBook::addToActiveOrders(uint64_t orderReferenceNumber, uint16_t stockLocate, uint32_t numShares, uint32_t price) {

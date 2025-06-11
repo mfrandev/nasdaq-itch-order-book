@@ -18,10 +18,12 @@ class Message {
         explicit Message(BinaryMessageHeader header) : 
         header(std::move(header))
         {}
+        explicit Message() = default;
         virtual ~Message() = default;
         virtual bool processMessage() const = 0; 
 
         const BinaryMessageHeader& getHeader() const { return header; }
+        void setHeader(BinaryMessageHeader header) { this -> header = std::move(header); }
 };
 
 #endif // NASDAQ_MESSAGE_H_

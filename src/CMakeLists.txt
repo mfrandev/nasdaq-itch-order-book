@@ -21,6 +21,7 @@ include_directories(
     "./bookkeeping" 
     "./messages"
     "./utils"
+    "./data_structures"
     ${Boost_INCLUDE_DIRS}
 )
 
@@ -29,6 +30,7 @@ file(GLOB SOURCES
   "./bookkeeping/*.cpp"
   "./messages/*.cpp"
   "./utils/*.cpp"
+  "./data_structures/*.cpp"
 )
 
 # The compiled library code is here

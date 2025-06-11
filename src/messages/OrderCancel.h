@@ -6,11 +6,15 @@
 #include <Message.h>
 #include <OrderBook.h>
 
+#include <mempool.h>
+
 // Class to store the Order Cancel message body
 class OrderCancel : public Message {
     private: 
         uint64_t orderReferenceNumber;
         uint32_t cancelledShares;
+
+        static MempoolSPSC<OrderCancel, SPSC_QUEUE_CAPACITY + 2> _mempool;
 
     public: 
         OrderCancel(BinaryMessageHeader header, uint64_t orderReferenceNumber, uint32_t cancelledShares) :
@@ -18,6 +22,19 @@ class OrderCancel : public Message {
         orderReferenceNumber(orderReferenceNumber),
         cancelledShares(cancelledShares)
         {}
+
+        /**
+         * Overload new/delete to use the mempool, rather than heap allocations
+         */
+        void* operator new(size_t) {
+            void* ptr = _mempool.allocate();
+            if (ptr == nullptr) throw std::bad_alloc();
+            return ptr;
+        }
+
+        void operator delete(void* ptr) {
+            _mempool.deallocate(static_cast<OrderCancel*>(ptr));
+        }
 
         bool processMessage() const override { OrderBook::getInstance().cancelActiveOrder(orderReferenceNumber, cancelledShares); return true; } 
 

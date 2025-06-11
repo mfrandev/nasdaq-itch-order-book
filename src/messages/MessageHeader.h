@@ -22,6 +22,11 @@ class BinaryMessageHeader {
         stockLocate(stockLocate),
         timestamp(timestamp)
         {}
+        BinaryMessageHeader() :
+        messageType('0'),
+        stockLocate(0),
+        timestamp(0)
+        {}
         ~BinaryMessageHeader() = default;
         BinaryMessageHeader(const BinaryMessageHeader&) = default;
         BinaryMessageHeader& operator=(const BinaryMessageHeader&) = default;

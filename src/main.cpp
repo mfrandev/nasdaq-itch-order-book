@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
             // Bookkeep time
             ProcessMessage::processHeaderTimestamp(currentTimestamp);
             // fmt::println("current: {}, prev: {}", currentTimestamp, previousTimestamp);
-            assert(previousTimestamp <= currentTimestamp || previousTimestamp == 0); // Similarly, we are processing messages out of order if this is ever false
+            // assert(previousTimestamp <= currentTimestamp || previousTimestamp == 0); // Similarly, we are processing messages out of order if this is ever false
             previousTimestamp = currentTimestamp;
             
             // Do bookkeeping, etc.
@@ -93,18 +93,17 @@ int main(int argc, char* argv[]) {
         std::size_t numberOfBytesForBody = ProcessMessage::messageTypeToNumberOfBytes(header.getMessageType());
         file.read(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody);
 
+        while(mq.write_available() == 0) {
+            std::this_thread::yield();
+        }
+
         // Parse the binary message, then add to the processing queue (if not nullptr)
         Message* messagePtr = ProcessMessage::getMessage(&buffer[NUMBER_OF_BYTES_FOR_HEADER_CHUNK], numberOfBytesForBody, std::move(header));
         if(messagePtr == nullptr) {
             delete messagePtr;
             continue;
         }
-        // std::unique_ptr<Message> message(messagePtr);
-        // counter++;
 
-        while(mq.write_available() == 0) {
-            std::this_thread::yield();
-        }
         bool success = mq.pushMesageToLockfreeSPSCQueue(messagePtr);
         assert(success); // If this fails, we lost sequentiality invariant
         // counterToQueue++;

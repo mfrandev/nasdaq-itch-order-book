@@ -9,6 +9,8 @@
 #include <time_utils.h>
 #include <VWAPManager.h>
 
+#include <mempool.h>
+
 // Class for parsing the CrossTrade binary message
 class CrossTrade : public Message {
     private:
@@ -17,6 +19,8 @@ class CrossTrade : public Message {
         uint32_t crossPrice;
         uint64_t matchNumber;
         char crossType;
+
+        static MempoolSPSC<CrossTrade, SPSC_QUEUE_CAPACITY + 2> _mempool;
 
     public:
         /**
@@ -35,6 +39,19 @@ class CrossTrade : public Message {
             if(isAfterHours(header.getTimestamp())) return false;
             VWAPManager::getInstance().handleCrossTrade(header.getTimestamp(), header.getStockLocate(), crossPrice, shares, matchNumber);
             return true;
+        }
+
+        /**
+         * Overload new/delete to use the mempool, rather than heap allocations
+         */
+        void* operator new(size_t) {
+            void* ptr = _mempool.allocate();
+            if (ptr == nullptr) throw std::bad_alloc();
+            return ptr;
+        }
+
+        void operator delete(void* ptr) {
+            _mempool.deallocate(static_cast<CrossTrade*>(ptr));
         }
 
         void setShares(uint64_t shares) { this -> shares = shares; }

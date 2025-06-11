@@ -7,6 +7,8 @@
 
 #include <OrderBook.h>
 
+#include <mempool.h>
+
 // Class to store the Order Replace message body
 class OrderReplace : public Message {
 
@@ -15,6 +17,8 @@ class OrderReplace : public Message {
         uint64_t newOrderReferenceNumber;
         uint32_t shares;
         uint32_t price;
+        static MempoolSPSC<OrderReplace, SPSC_QUEUE_CAPACITY + 2> _mempool;
+
 
     public:
         OrderReplace(BinaryMessageHeader header, uint64_t originalOrderReferenceNumber, uint64_t newOrderReferenceNumber, uint32_t shares, uint32_t price) :
@@ -33,6 +37,16 @@ class OrderReplace : public Message {
                 shares, 
                 price);
             return true;
+        }
+
+        void* operator new(size_t) {
+            void* ptr = _mempool.allocate();
+            if (ptr == nullptr) throw std::bad_alloc();
+            return ptr;
+        }
+
+        void operator delete(void* ptr) {
+            _mempool.deallocate(static_cast<OrderReplace*>(ptr));
         }
 
         void setOriginalOrderReferenceNumber(uint64_t originalOrderReferenceNumber) { this -> originalOrderReferenceNumber = originalOrderReferenceNumber; }

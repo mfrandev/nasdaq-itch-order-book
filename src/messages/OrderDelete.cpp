@@ -2,6 +2,8 @@
 
 #include <endian_utils.h>
 
+MempoolSPSC<OrderDelete, SPSC_QUEUE_CAPACITY + 2> OrderDelete::_mempool;
+
 /**
  * Parse the OrderDelete body
  */
