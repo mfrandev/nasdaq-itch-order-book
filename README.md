@@ -10,18 +10,20 @@
 <h4>Single Prodcer/Single Consumer (SPSC)</h4>
 <ol>
     <li>In the SPSC implementation, I use the "boost::lockfree:spsc_queue" to allow for basic, lockfree multithreading.</li>
+    <li>Allocating and deallocating heap memory for every message parsed is EXTREMELY expensive, as there are >300,000,000 messages per-ITCH file. Thus, I avoid this excessive memory overhead by creating a per-message memory pool on the stack.</li>
+    <li>The per-message memory pool is allocated "SPSC_QUEUE_SIZE + 2" spaces, since at most "SPSC_QUEUE_SIZE + 1" of any given message can exist at a time. The design of the lockfree ring buffer requires an empty space for "fullness" detection. 
     <li>The basic correctness precondition is, as the name suggests, that only one thread can push to the spsc_queue and only one thread can pop from it.</li>
     <li>In practice, one thread reads the binary file and places all elements in an instance of this lockfree queue, then a second thread goes through and processes each of those messages in parallel.</li>
     <li>Unlike the single threaded model, the SPSC model requires each of the message classes to inherit from a base superclass, "Message," so a pointer of each item can be placed on the queue.</li>
     <li>Regrettably, the boost lockfree queue requires its elements to be copyable, so using std::unique_ptr<Message> in the queue is not a viable strategy.</li>
     <li>Thus, I had to opt for raw pointers instead. I chose to forego casting to std::unique_ptr<Message> in the consumer thread and manually invoke "delete" to avoid the performance hit when transferring ownership of each message.</li>  
-    <li>Said performance hit was very significant. Using RAII in this case increased runtimes from ~125 seconds to ~145 seconds, nullifying any benefit gained from multithreading.</li>
+    <li>Said performance hit was very significant. Using RAII in this case increased runtimes by ~20%, nullifying any benefit gained from multithreading.</li>
 </ol>
 <h4>Performance</h4>
 <ol>
     <li>For hardware details, see the "Hardware I've Tested On" section below.</li>
-    <li>Single Threading generally executes in the range 140-155 seconds. Outlier performance is +/- 3 seconds.</li>
-    <li>SPSC generally executes in the range 120-130 seconds. Outlier performance is typically within four seconds below the low end of the range.</li>
+    <li>Single Threading generally executes in the range 60-65 seconds. Outlier performance is +/- 3 seconds.</li>
+    <li>SPSC generally executes in the range 40-45 seconds. Outlier performance is typically within 2 seconds below the low end of the range.</li>
 </ol>
 
 ## Critical Reasoning that Impacted Design and Implementation:
