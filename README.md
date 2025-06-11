@@ -26,8 +26,7 @@ My project uses one third party library that is unrelated to the problem domain.
 
 ## Hardware I've Tested On:
 <ol>
-    <li>(Main Workstation) Dell XPS 8950<br>Fedora Linux 40<br>12th Gen Intel Core i7-12700 (X86_64) <br>Compiler: GNU 14.2.1<br>Total execution time: ~146 seconds</li><br>
-    <li>(Other Laptop) 2017 13-Inch MacbookAir<br> MacOS Monterrey<br>1.8 GHz Intel Core i5 dual processor<br>Compiler: AppleClang 13.0.0.13000027<br>Total execution time: ~526 seconds</li>
+    <li>(Main Workstation) Dell XPS 8950<br>Fedora Linux 40<br>12th Gen Intel Core i7-12700 (X86_64) <br>Compiler: GNU 14.2.1<br>Total execution time: ~60 seconds</li><br>
 </ol>
 
 ## Implementation Notes:
