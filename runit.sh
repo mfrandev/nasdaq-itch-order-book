@@ -1,2 +1,2 @@
 cd build
-./nasdaq_order_book
+./nasdaq_order_book -m lf_spsc

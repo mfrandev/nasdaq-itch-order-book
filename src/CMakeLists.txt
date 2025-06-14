@@ -18,6 +18,7 @@ find_package(Boost REQUIRED)
 
 include_directories(
     "."
+    "../"
     "./bookkeeping" 
     "./messages"
     "./utils"
@@ -27,6 +28,7 @@ include_directories(
 
 file(GLOB SOURCES
   "main.cpp"
+  "../lib/*.hpp"
   "./bookkeeping/*.cpp"
   "./messages/*.cpp"
   "./utils/*.cpp"
